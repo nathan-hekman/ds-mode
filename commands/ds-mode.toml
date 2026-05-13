@@ -1,2 +1,2 @@
-description = "Activate DS Mode and set the mode (lite / full / visual / off). Default: full."
-prompt = "Activate DS Mode at level '{{args}}' (default `full` when args are empty). The UserPromptSubmit hook writes the chosen mode to $CLAUDE_CONFIG_DIR/.ds-mode-active; the SessionStart hook re-injects the ruleset each new session. Modes: lite = TLDR only no HTML, full = TLDR + HTML when prime directive fires, visual = TLDR + HTML on every reply, off = disable for the session. Confirm activation in one short line, then proceed with whatever the user asks next. Brand label in user-facing prose is always 'DS Mode'."
+description = "Switch DS Mode level (lite / full / visual / off). Default: full."
+prompt = "Switch DS Mode to {{args}}. If no level specified, use full. Confirm in one short line and continue."

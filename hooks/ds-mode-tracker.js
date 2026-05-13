@@ -31,18 +31,29 @@ process.stdin.on('end', () => {
     // No prompt context — just emit reminder if mode active.
   }
 
-  // 1. Mode-switch commands: /dsm, /dsm <mode>, /ds-mode, /ds-mode <mode>
-  const slashMatch = /^\/(dsm|ds-mode)(?:\s+(\w+))?$/.exec(prompt);
-  if (slashMatch) {
-    const arg = (slashMatch[2] || '').toLowerCase();
-    if (!arg) {
-      safeWriteFlag(flagPath, getDefaultMode());
-    } else if (arg === 'off') {
-      deleteFlag(flagPath);
-    } else if (VALID_MODES.includes(arg)) {
-      safeWriteFlag(flagPath, arg);
+  // 1. Mode-switch commands: /dsm, /dsm <mode>, /ds-mode, /ds-mode <mode>.
+  //    Match caveman's permissive prefix pattern (startsWith), not a strict
+  //    anchored regex — Claude Code sometimes passes the expanded-prompt text
+  //    or appends content after the slash, and a $ anchor silently drops the
+  //    match on any of those variants.
+  if (prompt.startsWith('/dsm') || prompt.startsWith('/ds-mode')) {
+    const parts = prompt.split(/\s+/);
+    const cmd = parts[0]; // /dsm, /ds-mode, /ds-mode:ds-mode, etc.
+    const arg = (parts[1] || '').toLowerCase();
+
+    // Only honor the bare toggle/alias commands here. /ds-mode-help,
+    // /ds-mode-session-summary, /ds-mode-user-flows are skills, not toggles.
+    if (cmd === '/dsm' || cmd === '/ds-mode' ||
+        cmd === '/ds-mode:dsm' || cmd === '/ds-mode:ds-mode') {
+      if (!arg) {
+        safeWriteFlag(flagPath, getDefaultMode());
+      } else if (arg === 'off') {
+        deleteFlag(flagPath);
+      } else if (VALID_MODES.includes(arg)) {
+        safeWriteFlag(flagPath, arg);
+      }
+      // Fall through to emit reminder below.
     }
-    // Fall through to emit reminder below.
   }
 
   // 2. NL triggers (defensive — slash commands are primary).

@@ -1,2 +1,2 @@
-description = "Alias for /ds-mode. Activate DS Mode and pick a mode (lite / full / visual / off)."
-prompt = "Activate DS Mode at level '{{args}}' (default `full` when args are empty). Same behavior as /ds-mode. Confirm in one short line and proceed."
+description = "Alias for /ds-mode. Switch DS Mode level (lite / full / visual / off)."
+prompt = "Switch DS Mode to {{args}}. If no level specified, use full. Confirm in one short line and continue."
