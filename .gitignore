@@ -16,3 +16,6 @@ NOTES.local
 
 # Generated DS Mode summaries (these go to /tmp anyway, but in case)
 dsmode-summary-*.html
+
+# DS Mode runtime state (must not be committed)
+.ds-mode-active
