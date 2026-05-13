@@ -1,9 +1,9 @@
 ---
-name: ds-mode-show
-description: Generate a single-page HTML recap of the current Claude Code session's conversation in plain English. Opens it in the browser. Use when the user asks for "a recap", "summary of what we talked about", "/ds-mode-show", or "show me what we did".
+name: ds-mode-session-summary
+description: Generate a single-page HTML summary of the current Claude Code session's conversation in plain English. Opens it in the browser. Use when the user asks for "a recap", "session summary", "summary of what we talked about", "/ds-mode-session-summary", or "show me what we did".
 ---
 
-# /ds-mode-show
+# /ds-mode-session-summary
 
 Generate a one-page HTML summary of the **current Claude Code session's conversation** in plain English. Save to `$TMPDIR` and `open` it.
 
@@ -11,7 +11,7 @@ Generate a one-page HTML summary of the **current Claude Code session's conversa
 
 A single self-contained HTML file with:
 
-- **Title bar** — "Session Recap · DS Mode"
+- **Title bar** — "Session Summary · DS Mode"
 - **3-6 bullets** distilling what was discussed (plain English; a second-grader should get it)
 - **One inline-SVG flow diagram** showing the arc of the conversation (start → key turns → outcome). Hand-drawn feel, muted palette, ≤200px tall.
 - **Optional "Next steps" section** with 2-3 bullets if the conversation ended on a decision or pending question.
@@ -33,9 +33,9 @@ Use `$CLAUDE_TRANSCRIPT_PATH` if the harness has populated it; otherwise glob th
    - Final assistant text per turn (last `text` block; ignore tool calls)
 3. Distill into bullets. Translate jargon as you go ("endpoint" → "the part of the server that answers requests", "refactor" → "rewrite without changing what it does").
 4. Generate the HTML inline.
-5. Save to `${TMPDIR:-/tmp}/dsmode-recap-$(date +%Y%m%d-%H%M%S).html`.
+5. Save to `${TMPDIR:-/tmp}/dsmode-session-summary-$(date +%Y%m%d-%H%M%S).html`.
 6. `open` the file via Bash.
-7. Reply with one line: **"Opened session recap in your browser."** No additional narrative.
+7. Reply with one line: **"Opened session summary in your browser."** No additional narrative.
 
 ## Stay in main thread
 

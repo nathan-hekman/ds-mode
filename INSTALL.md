@@ -74,7 +74,7 @@ rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active"
 | `$CLAUDE_CONFIG_DIR/.ds-mode-active` | current mode (`lite`/`full`/`visual` or absent for `off`) |
 | `$CLAUDE_CONFIG_DIR/settings.json.bak.preDSmode` | one-time backup of pre-install settings.json |
 | `$TMPDIR/dsmode-summary-<ts>.html` | auto one-pagers fired during normal chat (ephemeral) |
-| `$TMPDIR/dsmode-recap-<ts>.html` | `/ds-mode-show` output |
+| `$TMPDIR/dsmode-session-summary-<ts>.html` | `/ds-mode-session-summary` output |
 | `$TMPDIR/dsmode-user-flows-<slug>-<ts>.{html,json}` | `/ds-mode-user-flows` output |
 
 The plugin never writes into your project repo or homedir without explicit opt-in.

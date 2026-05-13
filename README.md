@@ -77,8 +77,9 @@ See [INSTALL.md](./INSTALL.md) for advanced flags, local-clone install, and unin
 | HTML one-pager when reply is long/dense | Y | — | — | — |
 | Mode switching (`lite` / `full` / `visual` / `off`) | Y | — | — | — |
 | Statusline `DS:<mode>` chip | Y | — | — | — |
-| `/ds-mode-show` (session recap HTML) | Y | — | — | — |
+| `/ds-mode-session-summary` (session summary HTML) | Y | — | — | — |
 | `/ds-mode-user-flows` (project user flows HTML+JSON) | Y | — | — | — |
+| `/ds-mode-help` (quick-reference card) | Y | — | — | — |
 | Auto-activate every session | Y | with adapter | with adapter | with adapter |
 
 \* Cursor/Copilot/Codex get the TLDR rule via the adapter rule files in `adapters/`. HTML one-pager + mode toggle + skills are Claude Code only — they depend on hooks + slash commands.
@@ -92,8 +93,9 @@ Trigger with:
 - Natural language: "ds mode on", "stop ds mode", "talk like ds mode"
 
 Skills:
-- `/ds-mode-show` — one-page HTML recap of the current conversation
+- `/ds-mode-session-summary` — one-page HTML summary of the current conversation
 - `/ds-mode-user-flows` — one-page HTML + JSON map of the project's main user flows
+- `/ds-mode-help` — quick-reference card for all DS Mode modes, skills, and commands
 
 ## Modes
 
