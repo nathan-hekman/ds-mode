@@ -1,0 +1,12 @@
+description = "Activate DS Mode — plain-English TLDR + conditional HTML one-pager at the bottom of every Claude Code reply. /ds-mode <mode> sets lite | full | visual | off."
+prompt = """
+Activate DS Mode at level "{{args}}" (default `full` when args are empty). The plugin's UserPromptSubmit hook writes the chosen mode to `$CLAUDE_CONFIG_DIR/.ds-mode-active`, and the SessionStart hook re-injects the ruleset on each new session.
+
+Modes:
+- lite    — TLDR block only, no HTML one-pager
+- full    — TLDR + HTML one-pager when prime directive fires (default)
+- visual  — TLDR + HTML one-pager on every non-trivial reply (>3 sentences)
+- off     — disable for the rest of this session
+
+Confirm activation in one short line and proceed with whatever the user asks next. Use the brand label "DS Mode" in any user-facing prose.
+"""

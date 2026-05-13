@@ -34,10 +34,13 @@ if (mode === 'off') {
 
 safeWriteFlag(flagPath, mode);
 
-// Read the SKILL.md ruleset. Plugin install layout:
+// Read the canonical ruleset. Plugin install layout:
 //   __dirname = <plugin_root>/hooks/
-//   SKILL.md at <plugin_root>/skills/ds-mode/SKILL.md
-const skillPath = path.join(__dirname, '..', 'skills', 'ds-mode', 'SKILL.md');
+//   ruleset at <plugin_root>/rules/ds-mode.md
+//
+// Kept out of skills/ so Claude Code does not register the file as a
+// user-invocable skill (which would clash with the /ds-mode toggle command).
+const skillPath = path.join(__dirname, '..', 'rules', 'ds-mode.md');
 let skillContent = '';
 try {
   skillContent = fs.readFileSync(skillPath, 'utf8');

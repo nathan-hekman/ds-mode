@@ -28,13 +28,15 @@ specific git tag (e.g. `v1.0.0`). Pinning to a tag means the maintainer can
 publish new versions without changing what your existing install command
 fetches.
 
-**The installers will modify these locations:**
-- `~/.claude/output-styles/ds-mode.md` (overwritten)
-- `~/.claude/commands/ds-mode.md` (overwritten)
-- `~/.claude/commands/dsm.md` (overwritten)
-- `~/.claude/settings.json` (only if `--permanent`; backed up to
-  `settings.json.bak.preDSmode` first)
-- `~/.codex/AGENTS.md` (created or appended; backed up if it existed)
+**The Claude Code installer modifies these locations:**
+- `~/.claude/plugins/known_marketplaces.json` (adds `ds-mode` marketplace entry via `claude plugin marketplace add`)
+- `~/.claude/plugins/installed_plugins.json` (adds `ds-mode@ds-mode` entry via `claude plugin install`)
+- `~/.claude/plugins/marketplaces/ds-mode/` (git clone of this repo)
+- `~/.claude/plugins/cache/ds-mode/ds-mode/<commit>/` (plugin install cache)
+- `~/.claude/.ds-mode-active` (current mode flag)
+- `~/.claude/settings.json` (backup to `settings.json.bak.preDSmode`; strips any stale `outputStyle` left over from v1)
+- `~/.zshenv` / `~/.zshrc` / `~/.bashrc` / `~/.bash_profile` (appends `export DS_MODE_DEFAULT=...` if missing; skipped with `--minimal`)
+- `~/.codex/AGENTS.md` (Codex adapter only: created or appended; backed up if it existed)
 
 The installers do not use `sudo`, do not delete anything, and do not write
 outside the user's home directory. Verify before running by reading the

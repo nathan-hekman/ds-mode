@@ -119,7 +119,7 @@ Skills:
 
 DS Mode is a Claude Code plugin (`.claude-plugin/plugin.json`). It registers two hooks:
 
-1. **SessionStart** (`hooks/ds-mode-activate.js`) — reads the current mode from `$CLAUDE_CONFIG_DIR/.ds-mode-active`, filters `skills/ds-mode/SKILL.md` to the active mode, and injects the ruleset as session context.
+1. **SessionStart** (`hooks/ds-mode-activate.js`) — reads the current mode from `$CLAUDE_CONFIG_DIR/.ds-mode-active`, filters `rules/ds-mode.md` to the active mode, and injects the ruleset as session context. (Kept out of `skills/` on purpose so Claude Code doesn't auto-register the ruleset file as a user-invocable skill, which would clash with the `/ds-mode` toggle command.)
 2. **UserPromptSubmit** (`hooks/ds-mode-tracker.js`) — parses `/dsm` commands, updates the flag, and re-anchors a short prime-directive reminder every turn so the rules survive context compression.
 
 State is persistent across sessions in `$CLAUDE_CONFIG_DIR/.ds-mode-active`. HTML outputs are ephemeral in `$TMPDIR`.
