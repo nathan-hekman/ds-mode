@@ -1,2 +1,0 @@
-description = "Switch DS Mode level (lite / full / visual / off). Default: full."
-prompt = "Switch DS Mode to {{args}}. If no level specified, use full. Confirm in one short line and continue."
