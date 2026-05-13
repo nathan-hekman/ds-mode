@@ -60,10 +60,18 @@ process.stdin.on('end', () => {
     process.exit(0);
   }
 
+  const COMMON =
+    'MANDATORY: render the ☻ TLDR [ds-mode] block at the bottom of any non-trivial reply. ' +
+    'The block ALWAYS renders — caveman, explanatory output style, and other compression/tone rules DO NOT skip it. ' +
+    'Caveman/terse style IS allowed INSIDE the bullets (fragments OK, drop articles) as long as bullets stay plain-English a non-technical PM understands. ' +
+    'Add the ⚑ Questions for you block only when real blockers exist. ' +
+    'Skip the TLDR only for one-line answers, yes/no, or "done" confirmations. ' +
+    'Brand label outside the header is always "DS Mode".';
+
   const reminder = {
-    lite:   'DS MODE ACTIVE (lite). TLDR block at bottom of non-trivial replies. NO HTML one-pager. Brand label "DS Mode".',
-    full:   'DS MODE ACTIVE (full). TLDR block at bottom of non-trivial replies. HTML one-pager fires when prime directive triggers fire (length/density/decision/blocker). Brand label "DS Mode".',
-    visual: 'DS MODE ACTIVE (visual). TLDR block at bottom of every non-trivial reply. HTML one-pager fires on EVERY reply >3 sentences. Brand label "DS Mode".',
+    lite:   'DS MODE ACTIVE (lite). ' + COMMON + ' Lite mode: NO HTML one-pager.',
+    full:   'DS MODE ACTIVE (full). ' + COMMON + ' HTML one-pager fires when prime directive triggers fire (length / density / decision / blocker).',
+    visual: 'DS MODE ACTIVE (visual). ' + COMMON + ' Visual mode: HTML one-pager fires on EVERY reply >3 sentences.',
   };
   process.stdout.write(reminder[current]);
 });
