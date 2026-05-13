@@ -1,38 +1,56 @@
 # DS Mode — Install Reference
 
-## One-line install (recommended)
+## Pure Claude Code commands (recommended)
+
+```bash
+claude plugin marketplace add nathan-hekman/ds-mode
+claude plugin install ds-mode@ds-mode
+```
+
+That's the canonical install path. It clones the marketplace into `$CLAUDE_CONFIG_DIR/plugins/marketplaces/ds-mode/`, registers it in `$CLAUDE_CONFIG_DIR/plugins/known_marketplaces.json`, installs the plugin into `$CLAUDE_CONFIG_DIR/plugins/cache/ds-mode/ds-mode/<commit>/`, and records it in `$CLAUDE_CONFIG_DIR/plugins/installed_plugins.json` — so DS Mode shows up in `/plugin list` and in Claude Code's desktop plugin UI.
+
+Restart Claude Code (or open a new session) and DS Mode is active.
+
+## One-line install (includes shell-rc setup)
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-claude-code.sh)
 ```
 
-Clones the repo to a temp dir and runs `install.sh --force`. Idempotent. Safe to re-run.
+This clones the repo to a temp dir and runs `install.sh --force`, which does the two `claude plugin` commands above plus:
+
+- writes `$CLAUDE_CONFIG_DIR/.ds-mode-active = full` so the SessionStart hook has a mode to read
+- strips any legacy `"outputStyle": "DS Mode"` (or `"Dipsh*t Mode"`) entry from `settings.json` left behind by the deprecated v1 install
+- appends `export DS_MODE_DEFAULT="full"` to your shell rc so the default survives flag deletion
+
+Idempotent. Safe to re-run.
 
 ## Local clone install
 
 ```bash
 git clone https://github.com/nathan-hekman/ds-mode.git
 cd ds-mode
-./install.sh                          # plugin + hooks + statusline (full default)
-./install.sh --minimal                # plugin only (no statusline / shell rc edits)
+./install.sh                          # plugin + flag + shell rc (full default)
+./install.sh --minimal                # plugin only (skip shell rc edit)
 ./install.sh --default-mode lite      # default to lite mode in new sessions
 ./install.sh --dry-run                # preview, write nothing
-./install.sh --force                  # overwrite a prior install
+./install.sh --force                  # re-run even if already installed
 ```
 
 ## What the installer does
 
-1. Copies the repo into `$CLAUDE_CONFIG_DIR/plugins/marketplaces/ds-mode/`.
-2. Backs up `$CLAUDE_CONFIG_DIR/settings.json` to `settings.json.bak.preDSmode` and strips any stale `outputStyle` value left over from v1.
-3. Writes `$CLAUDE_CONFIG_DIR/.ds-mode-active = full` (or your `--default-mode`).
-4. Adds `export DS_MODE_DEFAULT="full"` (or your default) to `~/.zshenv` / `~/.bashrc` so future shells inherit it (skipped with `--minimal`).
+1. Runs `claude plugin marketplace add nathan-hekman/ds-mode` (registers the marketplace).
+2. Runs `claude plugin install ds-mode@ds-mode` (clones into the plugins cache + records the install).
+3. Backs up `$CLAUDE_CONFIG_DIR/settings.json` to `settings.json.bak.preDSmode` and strips any stale `outputStyle` value left over from v1.
+4. Writes `$CLAUDE_CONFIG_DIR/.ds-mode-active = full` (or your `--default-mode`).
+5. Adds `export DS_MODE_DEFAULT="full"` (or your default) to `~/.zshenv` / `~/.zshrc` / `~/.bashrc` / `~/.bash_profile` so future shells inherit it (skipped with `--minimal`).
 
 ## Activating in Claude Code
 
-The plugin's hooks fire automatically once the plugin is on your `~/.claude/plugins` path and the marketplace is registered. If hooks don't fire:
+Once the two `claude plugin` commands have run, hooks fire automatically on the next session. If they don't:
 
-- Confirm `~/.claude/plugins/marketplaces/ds-mode/.claude-plugin/marketplace.json` exists.
-- Open Claude Code's plugin manager and verify `ds-mode` is installed/enabled.
+- Confirm registration: `claude plugin list` should show `ds-mode@ds-mode`.
+- Confirm marketplace: `claude plugin marketplace list` should show `ds-mode`.
 - Restart Claude Code (the SessionStart hook only fires on a fresh session).
 
 ## Verifying
@@ -60,11 +78,12 @@ Per-session state persists until you change it or `/dsm off`.
 ## Uninstall
 
 ```bash
-rm -rf "$CLAUDE_CONFIG_DIR/plugins/marketplaces/ds-mode"
+claude plugin uninstall ds-mode@ds-mode
+claude plugin marketplace remove ds-mode
 rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active"
 # Optionally restore your settings.json from the backup:
 # cp "$CLAUDE_CONFIG_DIR/settings.json.bak.preDSmode" "$CLAUDE_CONFIG_DIR/settings.json"
-# Remove the DS_MODE_DEFAULT export from ~/.zshenv / ~/.bashrc if you don't want it.
+# Remove the DS_MODE_DEFAULT export from ~/.zshenv / ~/.zshrc / ~/.bashrc if you don't want it.
 ```
 
 ## Files this plugin writes

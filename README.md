@@ -52,13 +52,22 @@ than parse a wall of jargon**.
 
 ## Install
 
-**One line. Plugin install, hooks wired, mode set to `full`.**
+**Pure Claude Code commands (recommended):**
+
+```bash
+claude plugin marketplace add nathan-hekman/ds-mode
+claude plugin install ds-mode@ds-mode
+```
+
+DS Mode now appears in `claude plugin list` and in Claude Code's desktop plugin UI. Restart Claude Code to activate.
+
+**One-line install with extras** (sets `DS_MODE_DEFAULT` in your shell rc, strips the legacy `outputStyle` setting, writes the mode flag):
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-claude-code.sh)
 ```
 
-That's it. Restart Claude Code — DS Mode is on by default in every new session. Toggle per-session with `/dsm`.
+DS Mode is on by default in every new session. Toggle per-session with `/dsm`.
 
 See [INSTALL.md](./INSTALL.md) for advanced flags, local-clone install, and uninstall.
 
