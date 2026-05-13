@@ -64,8 +64,12 @@ echo "  ✓ plugin copied to $PLUGINS_DIR"
 
 # 2. Strip stale outputStyle from settings.json (defensive cleanup).
 if [[ -f "$SETTINGS_FILE" ]]; then
-  run "cp \"$SETTINGS_FILE\" \"$SETTINGS_FILE.bak.preDSmode\""
-  python3 - "$SETTINGS_FILE" <<'PY'
+  if [[ "$DRY" -eq 1 ]]; then
+    printf 'DRY: cp "%s" "%s.bak.preDSmode"\n' "$SETTINGS_FILE" "$SETTINGS_FILE"
+    printf 'DRY: python3 strip stale outputStyle (DS Mode | Dipsh*t Mode | ds-mode) from %s\n' "$SETTINGS_FILE"
+  else
+    cp "$SETTINGS_FILE" "$SETTINGS_FILE.bak.preDSmode"
+    python3 - "$SETTINGS_FILE" <<'PY'
 import json, pathlib, sys
 p = pathlib.Path(sys.argv[1])
 try:
@@ -80,6 +84,7 @@ if isinstance(val, str) and val in stale_values:
     p.write_text(json.dumps(data, indent=2) + "\n")
     print(f"  ✓ removed stale outputStyle={val!r} from settings.json")
 PY
+  fi
 fi
 
 # 3. Write flag file with the chosen default.
