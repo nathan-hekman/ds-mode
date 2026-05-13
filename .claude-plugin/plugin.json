@@ -1,0 +1,34 @@
+{
+  "name": "ds-mode",
+  "description": "Plain-English TLDR + auto HTML one-pager for non-trivial Claude Code replies. Toggle per-session via /dsm. Modes: lite | full | visual | off.",
+  "author": {
+    "name": "Nathan Hekman",
+    "url": "https://github.com/nathan-hekman"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ds-mode-activate.js\"",
+            "timeout": 5,
+            "statusMessage": "Loading DS Mode..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ds-mode-tracker.js\"",
+            "timeout": 5,
+            "statusMessage": "Tracking DS Mode..."
+          }
+        ]
+      }
+    ]
+  }
+}

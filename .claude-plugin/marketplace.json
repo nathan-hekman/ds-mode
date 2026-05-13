@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ds-mode",
+  "description": "Plain-English TLDR at the bottom of every reply, plus auto-generated one-page HTML summaries when answers run long or technical.",
+  "owner": {
+    "name": "Nathan Hekman",
+    "url": "https://github.com/nathan-hekman"
+  },
+  "plugins": [
+    {
+      "name": "ds-mode",
+      "description": "DS Mode — plain-English answers with pretty pictures.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
