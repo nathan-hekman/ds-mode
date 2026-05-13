@@ -26,8 +26,8 @@
 
 <p align="center">
   <a href="https://nathan-hekman.github.io/ds-mode/"><strong>Landing page →</strong></a> ·
-  <a href="#install-everything-one-liner">Install</a> ·
-  <a href="#supported-tools">Supported tools</a>
+  <a href="#install">Install</a> ·
+  <a href="#what-you-get">What You Get</a>
 </p>
 
 <p align="center">
@@ -50,124 +50,72 @@ than parse a wall of jargon**.
 
 > *For people who skim. Built by one of them.*
 
-## What it does
+## Install
 
-| | |
-|---|---|
-| **TL;DR block** | Every long or technical reply ends with a 2-3 bullet recap. Hard cap: 12 words per bullet. Plain English. No jargon. |
-| **One-page visual** | When the answer is long, dense, decision-time, or has 2+ blockers, an HTML summary opens in your browser. |
-| **Asks only what it needs** | When the AI needs your input to keep going, it asks as scannable A/B/C tiles. When it doesn't, it stays quiet. |
+**One line. Plugin install, hooks wired, mode set to `full`.**
 
-<a id="install"></a>
-
-## Install everything (one-liner)
-
-```sh
-bash <(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-all.sh)
-```
-
-Detects which AI tools you have and installs DS Mode user-globally where it
-can (Claude Code, Codex CLI). For per-repo tools (Cursor, Copilot), it prints
-the one-liner you run from the repo root.
-
-## Install for one tool
-
-Pick your tool:
-
-### <img src="docs/assets/icon-claude.png" width="20" valign="middle"> Claude Code
-
-```sh
+```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-claude-code.sh)
 ```
 
-Copies the rules into `~/.claude/` and sets `"outputStyle": "DS Mode"`
-in `~/.claude/settings.json` so DS Mode loads on every session.
+That's it. Restart Claude Code — DS Mode is on by default in every new session. Toggle per-session with `/dsm`.
 
-Per-session toggle: `/dsm` (or `/ds-mode`).
-Off: remove the `"outputStyle"` line from `~/.claude/settings.json`.
+See [INSTALL.md](./INSTALL.md) for advanced flags, local-clone install, and uninstall.
 
-### <img src="docs/assets/icon-cursor.png" width="20" valign="middle"> Cursor (per-project)
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/adapters/cursor/.cursorrules -o .cursorrules
-```
-
-Run from your project root. Or paste the file contents into Cursor → Settings → Rules → User Rules for global.
-
-Full docs: [adapters/cursor/README.md](./adapters/cursor/README.md)
-
-### <img src="docs/assets/icon-codex.svg" width="20" valign="middle"> OpenAI Codex CLI (user-global)
-
-```sh
-mkdir -p ~/.codex && curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/adapters/codex/AGENTS.md -o ~/.codex/AGENTS.md
-```
-
-Or drop `AGENTS.md` in any project root for per-project.
-
-Full docs: [adapters/codex/README.md](./adapters/codex/README.md)
-
-### <img src="docs/assets/icon-copilot.svg" width="20" valign="middle"> GitHub Copilot Chat (per-repo)
-
-```sh
-mkdir -p .github && curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/adapters/copilot/copilot-instructions.md -o .github/copilot-instructions.md
-```
-
-Commit + push. Copilot picks it up on the next chat in that repo.
-
-Caveat: standard Copilot Chat can't run shell commands, so the auto-HTML pop-up doesn't fire — DS Mode falls back to a markdown summary block. Copilot Workspace's agent mode does support the full HTML feature.
-
-Full docs: [adapters/copilot/README.md](./adapters/copilot/README.md)
-
-<a id="supported-tools"></a>
-
-## Supported tools
-
-| Tool | TL;DR | Auto-HTML | Quiz cards | Install path |
-|---|:---:|:---:|:---:|---|
-| <img src="docs/assets/icon-claude.png" width="18" valign="middle"> **Claude Code** | ✓ | ✓ | ✓ | `./install.sh --permanent` |
-| <img src="docs/assets/icon-cursor.png" width="18" valign="middle"> **Cursor** | ✓ | ✓ | ✓ | `.cursorrules` |
-| <img src="docs/assets/icon-codex.svg" width="18" valign="middle"> **OpenAI Codex CLI** | ✓ | ✓ | ✓ | `~/.codex/AGENTS.md` |
-| <img src="docs/assets/icon-copilot.svg" width="18" valign="middle"> **GitHub Copilot Chat** | ✓ | markdown fallback | markdown fallback | `.github/copilot-instructions.md` |
-| <img src="docs/assets/icon-copilot.svg" width="18" valign="middle"> **Copilot Workspace agent** | ✓ | ✓ | ✓ | same as Copilot |
-| **Continue / aider / others** | — | — | — | PRs welcome |
-
-The auto-HTML feature requires the agent to run a shell command mid-response
-(`open` / `xdg-open` / `start`). Tools without shell access fall back to a
-markdown summary block.
-
-## When the visual fires
-
-Four triggers — any one of them opens the one-page summary (or, on Copilot,
-renders the markdown fallback):
-
-| Trigger | When |
+| Flag | What |
 |---|---|
-| **Long** | Body has ~400+ words, ~50+ lines, or 2+ code blocks |
-| **Dense** | Body has 2+ headings, an equation, or a multi-part concept |
-| **Decision** | You just landed a brainstorm or plan ("ok, let's do it") |
-| **Needs your call** | The AI has 2+ real questions for you to answer |
+| `--minimal` | Plugin install only — skip statusline + shell rc edits. |
+| `--default-mode <mode>` | Set the install-time default to `lite`, `full`, or `visual`. Defaults to `full`. |
+| `--force` | Overwrite a prior install. |
+| `--dry-run` | Print planned actions; write nothing. |
 
-HTML files are saved to `/tmp/dsmode-summary-YYYYMMDD-HHMMSS.html` and opened
-with the OS default-browser handler.
+## What You Get
 
-## Customize
+| Feature | Claude Code | Cursor / Windsurf | Copilot | Codex |
+|---|:-:|:-:|:-:|:-:|
+| Plain-English TLDR at bottom of replies | Y | Y* | Y* | Y* |
+| HTML one-pager when reply is long/dense | Y | — | — | — |
+| Mode switching (`lite` / `full` / `visual` / `off`) | Y | — | — | — |
+| Statusline `DS:<mode>` chip | Y | — | — | — |
+| `/ds-mode-show` (session recap HTML) | Y | — | — | — |
+| `/ds-mode-user-flows` (project user flows HTML+JSON) | Y | — | — | — |
+| Auto-activate every session | Y | with adapter | with adapter | with adapter |
 
-The rules live in a single text file per platform:
+\* Cursor/Copilot/Codex get the TLDR rule via the adapter rule files in `adapters/`. HTML one-pager + mode toggle + skills are Claude Code only — they depend on hooks + slash commands.
 
-- Claude Code: `~/.claude/output-styles/ds-mode.md`
-- Cursor: `.cursorrules` (project) or User Rules (Cursor settings)
-- Codex: `~/.codex/AGENTS.md` or `AGENTS.md` (project)
-- Copilot: `.github/copilot-instructions.md`
+## Usage
 
-Edit the file, restart your session if needed, the new behavior takes effect
-on the next response.
+Trigger with:
+- `/dsm` or `/ds-mode` — activate at default mode
+- `/dsm lite|full|visual` — pick a mode
+- `/dsm off` — disable for this session
+- Natural language: "ds mode on", "stop ds mode", "talk like ds mode"
 
-Common knobs:
+Skills:
+- `/ds-mode-show` — one-page HTML recap of the current conversation
+- `/ds-mode-user-flows` — one-page HTML + JSON map of the project's main user flows
 
-- **Bullet caps** — default is 3 bullets × 12 words. Loosen for richer recaps.
-- **Visual triggers** — raise or lower the word/heading thresholds.
-- **Header text** — the literal `-----------TLDR [DS Mode]------------` is one
-  string. Swap it.
+## Modes
+
+| Mode | Behavior |
+|---|---|
+| `lite` | TLDR block at bottom of non-trivial replies. No HTML. Use when you want plain-English recaps without browser pop-ups. |
+| `full` | **Default.** TLDR + HTML one-pager when the prime directive fires (length, density, decision, blocker triggers). |
+| `visual` | TLDR + HTML one-pager on every non-trivial reply (>3 sentences). Use when you want consistent visual deliverables. |
+| `off` | Disabled for this session. Flag removed; hooks emit nothing. |
+
+## How It Works
+
+DS Mode is a Claude Code plugin (`.claude-plugin/plugin.json`). It registers two hooks:
+
+1. **SessionStart** (`hooks/ds-mode-activate.js`) — reads the current mode from `$CLAUDE_CONFIG_DIR/.ds-mode-active`, filters `skills/ds-mode/SKILL.md` to the active mode, and injects the ruleset as session context.
+2. **UserPromptSubmit** (`hooks/ds-mode-tracker.js`) — parses `/dsm` commands, updates the flag, and re-anchors a short prime-directive reminder every turn so the rules survive context compression.
+
+State is persistent across sessions in `$CLAUDE_CONFIG_DIR/.ds-mode-active`. HTML outputs are ephemeral in `$TMPDIR`.
+
+## Other Tools
+
+The `adapters/` directory holds rule-file generators for Cursor, Copilot, and Codex. These get you the TLDR rule but not the HTML one-pager — they don't have a hook system. See `adapters/<tool>/README.md`.
 
 ## Why DS Mode
 
