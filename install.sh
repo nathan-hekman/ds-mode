@@ -93,7 +93,7 @@ echo "  ✓ wrote $FLAG_FILE = $DEFAULT_MODE"
 
 # 4. Add DS_MODE_DEFAULT export (so future sessions inherit).
 if [[ "$MINIMAL" -ne 1 ]]; then
-  for rc in "$HOME/.zshenv" "$HOME/.bashrc"; do
+  for rc in "$HOME/.zshenv" "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile"; do
     [[ -f "$rc" ]] || continue
     if ! grep -q 'DS_MODE_DEFAULT' "$rc" 2>/dev/null; then
       run "echo 'export DS_MODE_DEFAULT=\"$DEFAULT_MODE\"' >> \"$rc\""
