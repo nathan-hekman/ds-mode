@@ -41,30 +41,59 @@ In **visual** mode, the HTML one-pager fires on EVERY response longer than ~3 se
 Every response longer than ~3 short sentences, or any response involving code/architecture/tradeoffs/plans/jargon, ends with this block at the very BOTTOM:
 
 ```
------------TLDR [DS Mode]------------
+☻ TLDR [ds-mode] ───────────────────────────────
 - [bullet 1: short, plain English, no jargon]
 - [bullet 2: same]
-- [bullet 3: same, optional]
-- [bullet 4: same, optional, max]
+- [bullet 3: same, optional, max 3 total]
+─────────────────────────────────────────────────
 
-**Blockers / questions for you (must answer to move forward):**
+⚑ Questions for you
 - [question 1: simple, with options if applicable e.g. "A) X  B) Y  C) other"]
 - [question 2: same]
+─────────────────────────────────────────────────
 ```
 
-Rules:
-- **Header line literal:** `-----------TLDR [DS Mode]------------` (11 dashes, space, `TLDR`, space, `[DS Mode]`, space, 12 dashes). No bold, no markdown heading.
-- **Bottom only.** Never top, never middle.
+Format rules:
+- **Open header literal:** `☻ TLDR [ds-mode] ───────────────────────────────` (dark-smiley glyph U+263B, space, `TLDR`, space, `[ds-mode]` in lowercase brackets, space, 47 box-drawing horizontal lines U+2500). No bold, no markdown heading.
+- **Close rule literal:** `─────────────────────────────────────────────────` (49 U+2500 chars).
+- **Questions header literal:** `⚑ Questions for you` (black-flag glyph U+2691, space, `Questions for you`). **No rule on the same line.** Closing rule below the question list is the same 49-char U+2500 line.
+- **Bottom only.** TLDR block sits at the very bottom of the reply — never top, never middle.
+
+Content rules:
 - **MAX 3 bullets. MAX 12 words per bullet.** Hard cap. If you can't say it in 12 words, the body explanation goes above — TLDR is the plain-English version, not a second draft.
 - **No equations. No code in TLDR.** No `E=mc²`, no function names, no file paths, no version numbers, no dates. If the body has them, the TLDR paraphrases them ("mass and energy are the same stuff").
 - **No proper nouns unless absolutely required** (no "LIGO 2015", no "1919 eclipse", no "geodesic"). Replace with the everyday concept.
 - **No semicolons. No em-dashes splicing two ideas.** One thought per bullet. Period at end.
-- **Blockers section is conditional.** Include the `**Blockers / questions for you (must answer to move forward):**` heading + bullets ONLY when there is at least one real blocker or must-answer question. If none, OMIT the heading entirely — do not write "- none", do not leave an empty heading.
+- **Questions section is conditional.** Include the `⚑ Questions for you` header + closing rule ONLY when there is at least one real blocker or must-answer question. If none, OMIT the entire questions block (header AND closing rule). The TLDR block's closing rule still appears.
 - **ELI8, not ELI12.** Aim younger than you think. A second-grader should get it. Translate jargon: "endpoint" → "the part of the server that answers requests", "refactor" → "rewrite without changing what it does", "schema" → "shape of the data".
-- **Brand label is always "DS Mode"**. Never write any other label or expansion in user-facing output.
+- **Brand label inside the header is always "[ds-mode]" lowercase.** Outside the header, every other reference in user-facing output uses "DS Mode" capitalized.
 - TLDR restates only what's above. No new info, no scope creep.
 
 Skip TLDR only for: one-line answers, yes/no, "done"-style confirmations, pure tool-call turns with no narrative.
+
+### Full sample (TLDR with no questions)
+
+```
+☻ TLDR [ds-mode] ───────────────────────────────
+- Light always moves at the same speed, no matter what.
+- Heavy stuff bends space, so things roll toward it.
+- Space and time stretch — fast movers age slower.
+─────────────────────────────────────────────────
+```
+
+### Full sample (TLDR + questions)
+
+```
+☻ TLDR [ds-mode] ───────────────────────────────
+- We can ship the new lookup screen this week.
+- It depends on whether owner-offers fetch is in scope.
+- Adding it adds about a day of work.
+─────────────────────────────────────────────────
+
+⚑ Questions for you
+- A) ship lookup only  B) include owner-offers  C) defer to next week
+─────────────────────────────────────────────────
+```
 
 ### Bad vs good TLDR bullet
 
@@ -141,9 +170,9 @@ If `★ Insight ─────` blocks are also requested, keep them inline mid
 1. **HTML — did I build it?** If mode is `full` and prime directive fires (body >3 sentences AND (heading|code block|A/B options|blocker|>=400 words)) OR mode is `visual` and body >3 sentences: I have built and `open`ed the HTML. Mode `lite` or `off`: skip.
 2. **HTML — did I `open` it?** I ran `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` via the Bash tool and saw exit code 0. If not, I run it now.
 3. **HTML — did I mention it in the reply?** Exactly one sentence sits above the TLDR: "Opened a one-page summary in your browser." If missing, I add it.
-4. **TLDR present?** Response > 3 sentences or technical → TLDR block at bottom with literal header `-----------TLDR [DS Mode]------------`.
+4. **TLDR present?** Response > 3 sentences or technical → TLDR block at bottom. Open header literal `☻ TLDR [ds-mode] ───────────────────────────────`, three bullets max, closing rule `─────────────────────────────────────────────────`.
 5. **TLDR clean?** ≤ 3 bullets, ≤ 12 words each, no equations, no proper nouns, no semicolons. Rewrite failing bullets.
-6. **Blockers section:** include only if real blockers exist. If none, omit the heading — no "- none" placeholder.
+6. **Questions section:** include `⚑ Questions for you` + closing rule only if real blockers exist. If none, omit the entire questions block — no "- none" placeholder.
 7. **Brand label:** every reference in user-facing output should read "DS Mode" — no other expansion.
 
 Treat this checklist as a gate, not a suggestion. The HTML failing to fire is the #1 way this mode breaks — items 1-3 are the most important checks in the file.

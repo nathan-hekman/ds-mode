@@ -14,6 +14,22 @@ A Claude Code plugin that adds two things to non-trivial replies:
 1. A plain-English **TLDR block** at the bottom of the message — 3 bullets max, 12 words each, ELI8.
 2. An auto-generated **one-page HTML summary** opened in your browser when the prime directive fires (length / density / decision / blocker triggers), or on every reply when `visual` mode is on.
 
+### What the TLDR block looks like
+
+```
+☻ TLDR [ds-mode] ───────────────────────────────
+- short plain-English point
+- another point
+- one more, max three
+─────────────────────────────────────────────────
+
+⚑ Questions for you
+- A) option one  B) option two  C) defer
+─────────────────────────────────────────────────
+```
+
+`⚑ Questions for you` block only appears when there's at least one real blocker. TLDR block always appears for non-trivial replies.
+
 ## Modes
 
 | Mode | Trigger | What changes |
