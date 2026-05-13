@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local notes
+TODO.local
+NOTES.local
+*.local.md
+
+# Generated DS Mode summaries (these go to /tmp anyway, but in case)
+dsmode-summary-*.html

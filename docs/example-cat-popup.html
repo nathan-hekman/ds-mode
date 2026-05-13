@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Why cats knock things off tables</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f7f4ee;
+    --muted: #6b6660;
+    --rule: #d9d3c7;
+    --accent: #b8472a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif;
+    font-size: 15px; line-height: 1.5; }
+  .page { max-width: 880px; margin: 32px auto; padding: 0 28px 36px; }
+  header { display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 14px; border-bottom: 1px solid var(--rule); margin-bottom: 22px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .kicker { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+  .card { border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px 18px;
+    background: #fbf9f4; display: flex; gap: 14px; align-items: flex-start; }
+  .card .ic { flex: 0 0 56px; height: 56px; }
+  .card h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
+  .card p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+  .scene { margin: 26px 0 10px; padding: 18px; border: 1px solid var(--rule);
+    border-radius: 10px; background: #fbf9f4; display: flex; align-items: center; justify-content: center; }
+  footer { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--rule);
+    font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; }
+  .accent { color: var(--accent); }
+  svg { display: block; }
+  .stroke { stroke: var(--ink); stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .fill-muted { fill: #e8e1d0; }
+  .fill-accent { fill: var(--accent); }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Why cats knock things off tables</h1>
+    <span class="kicker">DS Mode · field guide</span>
+  </header>
+
+  <div class="scene">
+    <!-- The crime scene -->
+    <svg width="640" height="170" viewBox="0 0 640 170" aria-hidden="true">
+      <!-- table -->
+      <path class="stroke" d="M80 120 L560 120" />
+      <path class="stroke" d="M120 120 L120 160" />
+      <path class="stroke" d="M520 120 L520 160" />
+      <!-- cat (left, sketchy) -->
+      <g transform="translate(160 30)">
+        <path class="stroke" d="M10 80 C 10 40, 90 40, 90 80 L90 90 L10 90 Z" />
+        <!-- ears -->
+        <path class="stroke" d="M18 50 L24 32 L34 50" />
+        <path class="stroke" d="M66 50 L76 32 L82 50" />
+        <!-- eyes -->
+        <circle cx="32" cy="62" r="2" fill="#1a1a1a" />
+        <circle cx="68" cy="62" r="2" fill="#1a1a1a" />
+        <!-- nose/mouth -->
+        <path class="stroke" d="M50 70 L50 73 M46 76 Q50 79 54 76" />
+        <!-- tail flick -->
+        <path class="stroke" d="M90 88 Q 120 70 110 50" />
+      </g>
+      <!-- paw extending toward cup -->
+      <path class="stroke" d="M270 100 Q 300 90 330 100" />
+      <!-- cup, tipping -->
+      <g transform="translate(345 80) rotate(18)">
+        <path class="stroke" d="M0 0 L30 0 L26 30 L4 30 Z" />
+        <path class="stroke" d="M30 6 Q 42 14 30 22" />
+      </g>
+      <!-- falling droplets / motion lines -->
+      <path class="stroke" d="M400 110 L410 125" />
+      <path class="stroke" d="M412 108 L424 122" />
+      <!-- floor shadow of doomed cup -->
+      <ellipse cx="470" cy="148" rx="22" ry="3" class="fill-muted" />
+      <!-- exclamation cloud (silent) -->
+      <path class="stroke" d="M430 60 q 10 -18 28 -8 q 14 -14 26 0 q 12 -2 8 14 q 6 10 -10 14 q -10 12 -24 0 q -14 8 -22 -6 q -16 -2 -6 -14 z" />
+      <text x="460" y="78" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#1a1a1a">why?</text>
+    </svg>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <svg class="ic" viewBox="0 0 56 56" aria-hidden="true">
+        <circle cx="28" cy="28" r="22" class="fill-muted" />
+        <path class="stroke" d="M16 30 Q 28 16 40 30" />
+        <circle cx="22" cy="28" r="1.6" fill="#1a1a1a" />
+        <circle cx="34" cy="28" r="1.6" fill="#1a1a1a" />
+        <path class="stroke" d="M28 32 L28 36" />
+      </svg>
+      <div>
+        <h3>Hunt instinct</h3>
+        <p>Paw → small object → it moves. Brain logs "prey behavior confirmed." Toy, pen, water glass: all read the same.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <svg class="ic" viewBox="0 0 56 56" aria-hidden="true">
+        <rect x="14" y="14" width="28" height="28" rx="3" class="fill-muted" />
+        <path class="stroke" d="M20 22 L36 22 M20 28 L36 28 M20 34 L30 34" />
+        <path class="stroke" d="M44 44 L50 50" />
+      </svg>
+      <div>
+        <h3>Tiny scientist</h3>
+        <p>Cats run little gravity experiments. Edge of table is the lab bench. Cup is the variable. Result rarely disappoints.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <svg class="ic" viewBox="0 0 56 56" aria-hidden="true">
+        <path class="stroke" d="M10 40 Q 28 10 46 40" />
+        <circle cx="28" cy="40" r="3" class="fill-accent" />
+        <path class="stroke" d="M28 40 L28 48" />
+      </svg>
+      <div>
+        <h3>Attention payout</h3>
+        <p>You react every time. Yelling counts. Reaction = reward. Behavior gets reinforced even when you think you're punishing it.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <svg class="ic" viewBox="0 0 56 56" aria-hidden="true">
+        <circle cx="28" cy="28" r="20" class="fill-muted" />
+        <path class="stroke" d="M14 28 L42 28" />
+        <path class="stroke" d="M28 14 L28 42" />
+        <path class="stroke" d="M18 18 L38 38" />
+        <path class="stroke" d="M38 18 L18 38" />
+      </svg>
+      <div>
+        <h3>Whisker check</h3>
+        <p>Paws and whiskers probe edges, weight, texture. The cup falling is a side effect of testing where the table ends.</p>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column: 1 / span 2;">
+      <svg class="ic" viewBox="0 0 56 56" aria-hidden="true">
+        <rect x="10" y="20" width="36" height="22" rx="2" class="fill-muted" />
+        <path class="stroke" d="M18 20 L18 14 L38 14 L38 20" />
+        <path class="stroke" d="M28 28 L28 36 M24 32 L32 32" />
+      </svg>
+      <div>
+        <h3>Bored cat, big stage</h3>
+        <p>Indoor cat with no prey, no climb, no puzzle. Table becomes the stage. The fix isn't discipline — it's a taller cat tree, scheduled play, and food puzzles.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Field guide · cat behavior</span>
+    <span>Fix is environmental, not disciplinary.</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DS Mode — answers in plain English, with pretty pictures</title>
+<meta name="description" content="A Claude Code output style that adds a plain-English TL;DR to every answer, plus an auto one-page visual when things get long. For people who skim.">
+
+<!-- Open Graph (Slack, iMessage, Facebook, LinkedIn) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nathan-hekman.github.io/ds-mode/">
+<meta property="og:title" content="DS Mode — answers in plain English, with pretty pictures">
+<meta property="og:description" content="A Claude Code output style that adds a plain-English TL;DR to every answer, plus an auto one-page visual when things get long.">
+<meta property="og:image" content="https://nathan-hekman.github.io/ds-mode/assets/ds-mode-example.png">
+<meta property="og:image:alt" content="DS Mode: a Claude Code reply with a plain-English TL;DR recap block at the bottom.">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DS Mode — answers in plain English, with pretty pictures">
+<meta name="twitter:description" content="A Claude Code output style that adds a plain-English TL;DR to every answer, plus an auto one-page visual when things get long.">
+<meta name="twitter:image" content="https://nathan-hekman.github.io/ds-mode/assets/ds-mode-example.png">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #3a342e;
+    --paper: #faf8f4;
+    --paper-2: #f3eee4;
+    --rule: #e6e1d6;
+    --rule-strong: #c8c0b0;
+    --muted: #6b6258;
+    --accent: #b8462f;
+    --accent-soft: #f1d9cf;
+    --highlight: #fbe7a3;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  img, svg, iframe, pre { max-width: 100%; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Inter, sans-serif;
+    font-size: 16px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--highlight); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 36px; }
+
+  /* Top bar */
+  .top { padding: 22px 0 0; }
+  .top .row { display: flex; justify-content: space-between; align-items: center; }
+  .brand { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: var(--ink); }
+  .brand img { display: block; height: 26px; width: auto; }
+  .top a.ghlink { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); padding: 6px 12px; border: 1px solid var(--rule-strong); border-radius: 999px; text-decoration: none; line-height: 0; }
+  .top a.ghlink svg { display: block; width: 16px; height: 16px; }
+  .top a.ghlink:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* HERO */
+  .hero { padding: 56px 0 36px; text-align: center; position: relative; }
+  .hero-logo { display: block; margin: 0 auto 26px; height: 78px; width: auto; max-width: 80%; }
+  .kicker { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 14px; }
+  h1 { font-family: "Georgia", serif; font-weight: 500; font-size: 60px; line-height: 1.05; letter-spacing: -0.022em; margin: 0 auto 18px; max-width: none; white-space: normal; }
+  h1 .accent { color: var(--accent); position: relative; display: inline-block; }
+  h1 .accent::after { content: ""; position: absolute; left: -3%; right: -3%; bottom: 0.04em; height: 0.4em;
+    background: var(--highlight); z-index: -1; transform: rotate(-0.4deg); }
+  .subhead { font-size: 19px; color: var(--ink-soft); max-width: 44ch; margin: 0 auto 28px; }
+  .etym {
+    display: inline-block;
+    margin: 0 auto 26px;
+    padding: 10px 18px;
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--rule-strong);
+    border-radius: 4px;
+    font-family: "Georgia", serif;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    text-align: left;
+    max-width: 44ch;
+  }
+  .etym .term { font-weight: 600; color: var(--ink); }
+  .etym .pos { font-style: italic; color: var(--muted); margin: 0 4px; }
+  .etym .ipa { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; color: var(--muted); margin-right: 4px; }
+  .etym .src { font-style: italic; }
+  .cta { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .btn { display: inline-block; padding: 11px 18px; border-radius: 8px; font-size: 14px; font-weight: 500;
+         text-decoration: none; border: 1px solid var(--ink); color: var(--paper); background: var(--ink);
+         transition: transform 0.06s ease; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.ghost { background: transparent; color: var(--ink); }
+  .btn .mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 13px; }
+  .pitch-line { font-family: "Georgia", serif; font-style: italic; font-size: 15px; color: var(--muted); margin: 22px auto 0; max-width: 50ch; }
+  .pitch-line::before { content: "“"; margin-right: 2px; }
+  .pitch-line::after  { content: "”"; margin-left: 2px; }
+
+  /* SEE IT IN ACTION */
+  .action { padding: 30px 0 64px; }
+  .action h2 { font-family: "Georgia", serif; font-weight: 500; font-size: 32px; line-height: 1.15; letter-spacing: -0.012em; margin: 0 0 6px; text-align: center; }
+  .action .lede { text-align: center; color: var(--ink-soft); font-size: 15.5px; max-width: 56ch; margin: 0 auto 36px; }
+  .action .stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; position: relative; }
+  .action .chat { background: #fff; border: 1px solid var(--rule); border-radius: 14px; padding: 22px 24px; font-size: 14px; line-height: 1.55; min-width: 0; }
+  .action .chat .user-bubble { display: block; background: #eef2fa; padding: 10px 14px; border-radius: 14px; margin: 0 0 16px; font-size: 14px; max-width: 100%; }
+  .action .chat .resp p { margin: 0 0 11px; }
+  .action .chat .resp p strong { font-weight: 600; }
+  .action .chat .tldr-box { margin: 18px 0 0; padding: 12px 14px 10px; background: var(--highlight); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; position: relative; }
+  .action .chat .tldr-box .tag { position: absolute; top: -10px; right: 12px; background: var(--accent); color: #fff; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .action .chat .tldr-box .head { display: block; font-family: "SF Mono", Menlo, Consolas, monospace; color: var(--accent); font-weight: 600; font-size: 11.5px; margin-bottom: 4px; }
+  .action .chat .tldr-box ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
+  .action .chat .tldr-box li { margin: 2px 0; }
+  .action .chat .opened { margin: 14px 0 0; font-size: 13px; color: var(--accent); font-style: italic; position: relative; }
+  .action .chat .opened::before { content: "↳ "; }
+
+  /* CRT */
+  .crt-wrap { position: relative; padding-top: 18px; }
+  .crt {
+    background: linear-gradient(180deg, #d8d2c2 0%, #c8c2b0 100%);
+    border-radius: 22px 22px 18px 18px;
+    padding: 22px 22px 18px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      inset 0 -2px 0 rgba(0,0,0,0.08),
+      0 22px 40px rgba(26,26,26,0.18),
+      0 6px 14px rgba(26,26,26,0.12);
+    position: relative;
+  }
+  .crt::before {
+    content: "";
+    position: absolute;
+    top: 8px; right: 22px;
+    width: 80px; height: 8px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.18) 50%, transparent 100%);
+    border-radius: 4px;
+  }
+  .crt-screen {
+    position: relative;
+    background: #1a1a1a;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.4), inset 0 4px 18px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+  .crt-screen::after {
+    content: "";
+    position: absolute; inset: 14px;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 3px),
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08) 0%, transparent 60%);
+    border-radius: 6px;
+    mix-blend-mode: overlay;
+    z-index: 2;
+  }
+  .crt-iframe-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 880 / 720;
+    background: #f7f4ee;
+    border-radius: 6px;
+    overflow: hidden;
+    z-index: 1;
+    container-type: inline-size;
+  }
+  .crt-iframe-wrap iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 880px;
+    height: 720px;
+    border: 0;
+    transform-origin: top left;
+    transform: scale(calc(100cqw / 880));
+    pointer-events: none;
+    will-change: transform;
+  }
+  /* Fallback for browsers without container queries (iOS Safari < 16). JS
+     also re-applies a precise scale at end of body. */
+  @supports not (container-type: inline-size) {
+    .crt-iframe-wrap iframe { transform: scale(0.40); }
+  }
+  .crt-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 14px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(0,0,0,0.55);
+  }
+  .crt-meta .led { display: inline-flex; align-items: center; gap: 8px; }
+  .crt-meta .led::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: #5fb84a;
+    box-shadow: 0 0 6px #5fb84a;
+  }
+  .crt-stand {
+    width: 60%; margin: 0 auto;
+    height: 14px;
+    background: linear-gradient(180deg, #c8c2b0 0%, #aea796 100%);
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 6px 10px rgba(26,26,26,0.12);
+  }
+  .crt-base {
+    width: 75%; margin: 0 auto;
+    height: 8px;
+    background: linear-gradient(180deg, #aea796 0%, #968e7c 100%);
+    border-radius: 4px;
+    box-shadow: 0 8px 12px rgba(26,26,26,0.1);
+  }
+  .crt-link {
+    display: block; margin: 14px auto 0; text-align: center;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .crt-link a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+  .crt-link a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+  /* TILES */
+
+  /* WHAT IT IS */
+  .whatitis { padding: 20px 0 36px; text-align: center; }
+  .whatitis .kicker { margin-bottom: 14px; }
+  .whatitis-body { font-family: "Georgia", serif; font-size: 22px; line-height: 1.4; color: var(--ink); max-width: 36ch; margin: 0 auto; letter-spacing: -0.005em; }
+
+  /* PLAYS NICE WITH */
+  .compat { padding: 8px 0 32px; text-align: center; border-top: 1px dashed var(--rule); }
+  .compat-label { font-family: "Georgia", serif; font-style: italic; font-size: 14px; color: var(--muted); margin: 28px 0 16px; }
+  .compat-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 12px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 14px;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .chip .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #5fb84a;
+    box-shadow: 0 0 6px rgba(95,184,74,0.5);
+  }
+
+  /* INSTALL */
+  .install { padding: 32px 0 56px; text-align: center; border-top: 1px solid var(--rule); }
+  .install .kicker { margin-bottom: 6px; }
+  .install h2 { font-family: "Georgia", serif; font-weight: 500; font-size: 26px; letter-spacing: -0.012em; margin: 0 0 26px; }
+  .install-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; text-align: left; }
+  .install-card { border: 1px solid var(--rule); border-radius: 10px; background: #fff; padding: 18px 20px 16px; display: flex; flex-direction: column; }
+  .install-card h4 { font-family: "Georgia", serif; font-weight: 500; font-size: 17px; letter-spacing: -0.005em; margin: 0 0 10px; display: flex; align-items: center; gap: 9px; }
+  .install-card h4 img { width: 22px; height: 22px; display: block; object-fit: contain; }
+  .kicker .ki { width: 14px; height: 14px; display: inline-block; vertical-align: -2px; object-fit: contain; margin: 0 4px 0 8px; }
+  .kicker .ki:first-of-type { margin-left: 0; }
+  .install-card .code-block { display: block; min-width: 0; margin: 0 0 10px; padding: 12px 14px; font-size: 11.5px; line-height: 1.55; white-space: pre; overflow-x: auto; }
+  .install-all { max-width: 760px; margin: 0 auto; }
+  .install-all .code-block { display: block; min-width: 0; padding: 16px 18px; font-size: 12.5px; line-height: 1.6; text-align: left; }
+  .code-block.one-line { white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere; overflow-x: auto; }
+  .install-card { overflow: hidden; }
+  .install-all { overflow: hidden; }
+  .install-card .install-note { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .install-card .install-note code { font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--paper-2); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+  .code-block { display: inline-block; text-align: left; background: #1a1a1a; color: #f1ede4; border-radius: 10px; padding: 16px 22px;
+    font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 13px; line-height: 1.65; margin: 0 0 12px; min-width: 360px; }
+  .code-block .c { color: #8a8275; }
+  .code-block .k { color: #d6b07a; }
+  .install .note { color: var(--muted); font-size: 13.5px; margin: 8px 0 0; }
+  .install .note code { font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--paper-2); padding: 1px 6px; border-radius: 4px; font-size: 12.5px; }
+
+  /* FOOTER */
+  .foot { padding: 28px 0 56px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 12.5px; }
+  .foot a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--rule-strong); }
+  .foot a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 0 24px; }
+    h1 { font-size: 42px; }
+    .install-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .action .stage { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+    .hero { padding: 56px 0 44px; }
+    .hero-logo { height: 70px; margin-bottom: 24px; }
+    .kicker { font-size: 10.5px; letter-spacing: 0.16em; margin-bottom: 22px; }
+    .kicker .ki { width: 12px; height: 12px; margin: 0 4px 0 6px; vertical-align: -1px; }
+    .kicker .kicker-for { display: none; }
+    .subhead { font-size: 17px; line-height: 1.5; margin-bottom: 30px; }
+    .pitch-line { font-size: 14px; margin-top: 24px; }
+    section { padding: 56px 0; }
+    .action { padding: 24px 0 56px; }
+    .action h2 { font-size: 28px; margin-bottom: 10px; }
+    .action .lede { font-size: 15px; line-height: 1.55; margin-bottom: 32px; }
+    .install h2 { font-size: 24px; margin-bottom: 28px; }
+    .install-card { padding: 18px 20px 16px; }
+    .install-card .code-block { font-size: 11px; padding: 12px 14px; }
+    .top { padding: 20px 0 0; }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 0 20px; }
+    h1 { font-size: 34px; line-height: 1.05; max-width: 100%; margin-bottom: 22px; }
+    .hero { padding: 44px 0 36px; }
+    .hero-logo { height: 56px; margin-bottom: 22px; }
+    .kicker { font-size: 10px; letter-spacing: 0.14em; }
+    .kicker .ki { display: none; }
+    .subhead, .pitch-line, .action .lede { max-width: 100%; }
+    .subhead { font-size: 16px; }
+    .crt { padding: 16px 16px 14px; border-radius: 18px 18px 14px 14px; }
+    .crt-screen { padding: 10px; }
+    .crt-meta { font-size: 9px; margin-top: 10px; }
+    .action .chat { padding: 20px 22px; font-size: 14px; }
+    .action .chat .user-bubble { padding: 12px 16px; margin-bottom: 18px; }
+    .action .chat .resp p { margin-bottom: 11px; line-height: 1.55; }
+    .install-all .code-block { font-size: 10.5px; padding: 12px 14px; word-break: break-all; }
+    .install-card .code-block { font-size: 10.5px; padding: 10px 12px; word-break: break-all; }
+    .top a.ghlink { padding: 5px 10px; }
+    .top a.ghlink svg { width: 14px; height: 14px; }
+    section { padding: 44px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap row">
+    <a class="brand" href="/ds-mode/">
+      <img src="assets/ds-mode-logo.png" alt="DS Mode">
+    </a>
+    <a class="ghlink" href="https://github.com/nathan-hekman/ds-mode" target="_blank" rel="noopener" aria-label="Star on GitHub">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.305-5.467-1.334-5.467-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+    </a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <img class="hero-logo" src="assets/ds-mode-logo.png" alt="DS Mode">
+    <p class="kicker"><span class="kicker-for">For </span><img class="ki" src="assets/icon-claude.png" alt="">Claude Code · <img class="ki" src="assets/icon-cursor.png" alt="">Cursor · <img class="ki" src="assets/icon-codex.svg" alt="">Codex · <img class="ki" src="assets/icon-copilot.svg" alt="">Copilot</p>
+    <h1>Answers in plain English.<br>With <span class="accent">pretty pictures</span>.</h1>
+    <p class="subhead">Big-brain reply on top. Plain-English nudge at the bottom. Pictures when things get long.</p>
+    <p class="etym">
+      <span class="term">DS Mode</span>
+      <span class="ipa">/dɛs məʊd/</span>
+      <span class="pos">n.</span>
+      from German <span class="src">Dumm Sprecht</span>: to speak simply.
+    </p>
+    <div class="cta">
+      <a class="btn" href="#install">Install · <span class="mono">/dsm</span></a>
+      <a class="btn ghost" href="https://github.com/nathan-hekman/ds-mode" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <p class="pitch-line">For people who skim. Built by one of them.</p>
+  </section>
+
+  <!-- SEE IT IN ACTION -->
+  <section class="action">
+    <h2>See it in action.</h2>
+    <p class="lede">A real long-winded question, a real long-winded answer, a recap you can actually use — and a one-page summary that pops open in your browser.</p>
+
+    <div class="stage">
+      <!-- Chat thread -->
+      <div class="chat">
+        <div class="user-bubble">&gt; my cat literally just knocked over my coffee mug. third one this week. she sits there. makes eye contact. then deliberately swats it off the table. why??? is she mad? bored? possessed? help.</div>
+
+        <div class="resp">
+          <p><strong>Short version: she's not mad. She's running an experiment, getting paid for it, and bored.</strong></p>
+          <p><strong>Hunt instinct.</strong> Cats have inherited prey-detection wiring. Anything small that moves when batted reads as prey — mug, keys, pen, doesn't matter. The mug shattering is irrelevant to that wiring.</p>
+          <p><strong>Attention payout.</strong> You react every time. Yelling, laughing, picking it up, putting it back — to her that's a jackpot. The behavior gets reinforced even when you think you're punishing it.</p>
+          <p><strong>Bored cat, big stage.</strong> No prey to chase, no climbing, no puzzle — your counter is the only show. The fix isn't discipline. It's environment: vertical space, scheduled play, food puzzles.</p>
+
+          <div class="tldr-box">
+            <span class="tag">DS Mode</span>
+            <span class="head">-----------TLDR [DS Mode]------------</span>
+            <ul>
+              <li>Cats hunt, test gravity, and like your reaction.</li>
+              <li>Your yelling teaches them to do it again.</li>
+              <li>Bored indoor cats turn tables into a stage.</li>
+            </ul>
+          </div>
+          <p class="opened">Opened a one-page summary in your browser. →</p>
+        </div>
+      </div>
+
+      <!-- CRT mock with the actual one-pager inside -->
+      <div class="crt-wrap">
+        <div class="crt">
+          <div class="crt-screen">
+            <div class="crt-iframe-wrap">
+              <iframe src="example-cat-popup.html" title="DS Mode one-page summary: Why cats knock things off tables" scrolling="no" sandbox="allow-same-origin"></iframe>
+            </div>
+          </div>
+          <div class="crt-meta">
+            <span class="led">DS Mode · field guide</span>
+            <span>CH 03</span>
+          </div>
+        </div>
+        <div class="crt-stand"></div>
+        <div class="crt-base"></div>
+        <p class="crt-link">↑ this opens for real → <a href="example-cat-popup.html" target="_blank" rel="noopener">view full one-pager</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT IT IS -->
+  <section class="whatitis">
+    <p class="kicker">What it is</p>
+    <p class="whatitis-body">A free config for your AI coding agent. Adds a short, plain-English recap to the bottom of every long answer — and pops a one-page picture in your browser when the answer covers a lot. That's it.</p>
+  </section>
+
+  <!-- PLAYS NICE WITH -->
+  <section class="compat">
+    <p class="compat-label">Plays nice with</p>
+    <div class="compat-row">
+      <span class="chip"><span class="dot"></span>Caveman mode</span>
+      <span class="chip"><span class="dot"></span>Plan mode</span>
+      <span class="chip"><span class="dot"></span>Sub-agents</span>
+      <span class="chip"><span class="dot"></span>Explanatory mode</span>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section class="install" id="install">
+    <p class="kicker">Install</p>
+    <h2>One line. Every tool.</h2>
+
+    <div class="install-all">
+<pre class="code-block one-line"><span class="c"># installs to every AI tool I detect on your machine</span>
+bash &lt;(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-all.sh)</pre>
+    </div>
+
+    <p class="note" style="margin: 32px 0 18px;">Or just one tool:</p>
+
+    <div class="install-grid">
+      <div class="install-card">
+        <h4><img src="assets/icon-claude.png" alt="">Claude Code</h4>
+<pre class="code-block one-line">bash &lt;(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-claude-code.sh)</pre>
+        <p class="install-note">User-global. Per-session toggle: <code>/dsm</code></p>
+      </div>
+
+      <div class="install-card">
+        <h4><img src="assets/icon-cursor.png" alt="">Cursor</h4>
+<pre class="code-block one-line">curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/adapters/cursor/.cursorrules -o .cursorrules</pre>
+        <p class="install-note">Per-project. Run from your repo root.</p>
+      </div>
+
+      <div class="install-card">
+        <h4><img src="assets/icon-codex.svg" alt="">Codex CLI</h4>
+<pre class="code-block one-line">mkdir -p ~/.codex && curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/adapters/codex/AGENTS.md -o ~/.codex/AGENTS.md</pre>
+        <p class="install-note">User-global.</p>
+      </div>
+
+      <div class="install-card">
+        <h4><img src="assets/icon-copilot.svg" alt="">Copilot Chat</h4>
+<pre class="code-block one-line">mkdir -p .github && curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/adapters/copilot/copilot-instructions.md -o .github/copilot-instructions.md</pre>
+        <p class="install-note">Per-repo. TL;DR only — no auto-HTML in standard Copilot.</p>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:24px;">Want a port for Continue, aider, JetBrains, or something else? <a href="https://github.com/nathan-hekman/ds-mode/issues" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent-soft);">Open an issue</a>.</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <span>DS Mode · MIT</span>
+    <span><a href="https://github.com/nathan-hekman/ds-mode" target="_blank" rel="noopener">github.com/nathan-hekman/ds-mode</a></span>
+  </footer>
+
+</div>
+
+<script>
+  // Belt-and-suspenders scale for the CRT iframe. CSS container queries
+  // handle this natively in modern browsers; this script is the fallback
+  // for older iOS Safari + a re-run hook for layout shifts after load.
+  (function () {
+    var wrap = document.querySelector('.crt-iframe-wrap');
+    var ifr = wrap && wrap.querySelector('iframe');
+    if (!wrap || !ifr) return;
+    var NATURAL = 880;
+    var supportsContainerQ = false;
+    try { supportsContainerQ = CSS && CSS.supports && CSS.supports('container-type: inline-size'); } catch (e) {}
+    function fit() {
+      var w = wrap.clientWidth;
+      if (!w) return;
+      // If container queries work, leave the CSS-driven scale alone — it
+      // tracks the actual rendered width with no script involvement.
+      if (supportsContainerQ) return;
+      ifr.style.transform = 'scale(' + (w / NATURAL) + ')';
+    }
+    fit();
+    if (ifr.addEventListener) ifr.addEventListener('load', fit);
+    if (document.readyState !== 'complete') window.addEventListener('load', fit);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    setTimeout(fit, 100);
+    setTimeout(fit, 600);
+    if (typeof ResizeObserver === 'function') {
+      try { new ResizeObserver(fit).observe(wrap); } catch (e) {}
+    }
+  })();
+</script>
+</body>
+</html>
