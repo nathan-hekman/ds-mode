@@ -235,19 +235,6 @@
     box-shadow: 0 0 6px rgba(95,184,74,0.5);
   }
 
-  /* FEATURES */
-  .features { padding: 24px 0 48px; text-align: center; border-top: 1px solid var(--rule); }
-  .features .kicker { margin-bottom: 22px; }
-  .feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; text-align: left; max-width: 920px; margin: 0 auto; }
-  .feature { padding: 16px 18px; border: 1px solid var(--rule); border-radius: 10px; background: #fff; }
-  .feature h4 { font-family: "Georgia", serif; font-weight: 500; font-size: 16px; letter-spacing: -0.005em; margin: 0 0 6px; color: var(--ink); }
-  .feature p { font-size: 13.5px; line-height: 1.5; color: var(--muted); margin: 0; }
-  .feature p code { font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--paper-2); padding: 1px 5px; border-radius: 4px; font-size: 12px; color: var(--ink); }
-  .feature p em { color: var(--ink); font-style: italic; }
-  @media (max-width: 760px) {
-    .feature-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
-  }
-
   /* INSTALL */
   .install { padding: 32px 0 56px; text-align: center; border-top: 1px solid var(--rule); }
   .install .kicker { margin-bottom: 6px; }
@@ -410,37 +397,6 @@
   <section class="whatitis">
     <p class="kicker">What it is</p>
     <p class="whatitis-body">A free config for your AI coding agent. Adds a short, plain-English recap to the bottom of every long answer — and pops a one-page picture in your browser when the answer covers a lot. That's it.</p>
-  </section>
-
-  <!-- WHAT YOU GET -->
-  <section class="features">
-    <p class="kicker">What you get</p>
-    <div class="feature-grid">
-      <div class="feature">
-        <h4>Plain-English TL;DR</h4>
-        <p>Three bullets at the bottom of every long reply. Twelve words each. ELI8.</p>
-      </div>
-      <div class="feature">
-        <h4>One-page picture</h4>
-        <p>Auto-opens in your browser when the answer is long enough. Illustration-first, not boxes of words.</p>
-      </div>
-      <div class="feature">
-        <h4>Lite / full / off</h4>
-        <p>Pick how loud you want it. Lite skips the picture; full opens one when it earns one; off pauses everything.</p>
-      </div>
-      <div class="feature">
-        <h4>Light / dark / auto</h4>
-        <p>The picture follows your OS by default, or pin it with <code>/ds-mode dark</code> or <code>/ds-mode light</code>.</p>
-      </div>
-      <div class="feature">
-        <h4>Mobile mode</h4>
-        <p>Opt-in. Auto-publishes each picture to <em>your own private GitHub repo</em> so you can tap it from your phone. Only you can see them.</p>
-      </div>
-      <div class="feature">
-        <h4>Update nudge</h4>
-        <p>Quiet up-arrow on the corner chip when a new version's out. Never in the answer.</p>
-      </div>
-    </div>
   </section>
 
   <!-- PLAYS NICE WITH -->
