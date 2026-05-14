@@ -2,7 +2,7 @@
 // ds-mode-tracker.js — Claude Code UserPromptSubmit hook for DS Mode.
 //
 // Parses /ds-mode sub-commands and updates the matching flag file, then
-// re-emits a short "DS MODE ACTIVE (mode · theme · tone)" reminder so the
+// re-emits a short "DS MODE ACTIVE (mode · theme)" reminder so the
 // prime directive survives context compression.
 //
 //   /ds-mode                  → activate at default mode
@@ -10,17 +10,15 @@
 //   /ds-mode off              → disable (delete flag)
 //   /ds-mode lite | full      → switch mode
 //   /ds-mode dark|light|auto  → switch theme
-//   /ds-mode surfer|default   → switch tone (easter egg)
 //   /ds-mode <free text>      → activate AND force HTML one-pager this turn
 
 const path = require('path');
 const fs = require('fs');
 const {
-  VALID_MODES, VALID_THEMES, VALID_TONES,
+  VALID_MODES, VALID_THEMES,
   claudeConfigDir,
   getDefaultMode, readMode, safeWriteMode,
   getDefaultTheme, readTheme, safeWriteTheme,
-  getDefaultTone, readTone, safeWriteTone,
   readMobileConfig, writeMobileConfig, mobileIsEnabled,
   deleteFlag,
 } = require('./ds-mode-config');
@@ -28,7 +26,6 @@ const {
 const claudeDir = claudeConfigDir();
 const flagPath = path.join(claudeDir, '.ds-mode-active');
 const themePath = path.join(claudeDir, '.ds-mode-theme');
-const tonePath = path.join(claudeDir, '.ds-mode-tone');
 const mobilePath = path.join(claudeDir, '.ds-mode-mobile');
 
 let mobileNote = '';
@@ -65,13 +62,6 @@ process.stdin.on('end', () => {
           ? ' Stamper will keep the prefers-color-scheme media query.'
           : ` Stamper must pass --theme ${argLower} so the one-pager hardcodes that palette.`);
       ensureActive();
-    } else if (VALID_TONES.includes(argLower)) {
-      safeWriteTone(tonePath, argLower);
-      toggleNote = ` Tone just switched to "${argLower}".` +
-        (argLower === 'surfer'
-          ? ' Surfer overlay rules now apply: chill cadence, plain words. Zero emoji.'
-          : ' Default voice restored.');
-      ensureActive();
     } else if (mobileMatch) {
       handleMobileSubcommand(mobileMatch[1] || 'status');
       ensureActive();
@@ -92,10 +82,9 @@ process.stdin.on('end', () => {
   if (!mode) process.exit(0);
 
   const theme = readTheme(themePath) || getDefaultTheme();
-  const tone = readTone(tonePath) || getDefaultTone();
   const mobileEnabled = mobileIsEnabled(mobilePath);
   const mobileCfg = readMobileConfig(mobilePath);
-  process.stdout.write(reminderFor({ mode, theme, tone, mobileEnabled, mobileCfg, forcedHtml, toggleNote, mobileNote }));
+  process.stdout.write(reminderFor({ mode, theme, mobileEnabled, mobileCfg, forcedHtml, toggleNote, mobileNote }));
 });
 
 function ensureActive() {
@@ -169,14 +158,13 @@ function handleMobileSubcommand(sub) {
   }
 }
 
-function reminderFor({ mode, theme, tone, mobileEnabled, mobileCfg, forcedHtml, toggleNote, mobileNote }) {
+function reminderFor({ mode, theme, mobileEnabled, mobileCfg, forcedHtml, toggleNote, mobileNote }) {
   const stamperPath = path.resolve(__dirname, '..', 'templates', 'build.mjs');
   const COMMON =
-    `DS MODE ACTIVE (mode: ${mode} · theme: ${theme} · tone: ${tone}). ` +
+    `DS MODE ACTIVE (mode: ${mode} · theme: ${theme}). ` +
     'MANDATORY: render the ☻ TLDR [ds-mode] block at the bottom of any non-trivial reply. ' +
     'TLDR FORMAT (strict): header line `☻ TLDR [ds-mode]` with NO trailing dashes; bullets directly under; NO close-rule dashes (Claude mobile parses dash runs as a table divider and emits literal <tr><td>). ' +
     'TLDR CONTENT (hard caps — count before sending): MAX 3 bullets. MAX 12 words per bullet. ELI8 (a 2nd-grader reads it). ZERO jargon — none of: orchestrator, daemon, WebSocket, SIGINT, kernel, async, cron, regex, endpoint, hook, runtime, payload, socket, process, subprocess. ' +
-    'In surfer tone, the BODY changes voice; the TLDR bullets stay plain English. ' +
     'Skip the TLDR only for one-line answers, yes/no, or "done" confirmations, or short status/fix updates. ' +
     'Add the ⚑ Questions for you block only when real blockers exist (no close-rule dashes there either). ' +
     'Brand label outside the header is always "DS Mode".';
@@ -202,11 +190,6 @@ function reminderFor({ mode, theme, tone, mobileEnabled, mobileCfg, forcedHtml, 
     themeClause = ` Active theme is **${theme}** — when invoking the stamper, pass --theme ${theme} so the one-pager hardcodes that palette regardless of OS preference.`;
   }
 
-  let toneClause = '';
-  if (tone === 'surfer') {
-    toneClause = ' Tone is **surfer** (easter egg). Voice in the body, TLDR, and HTML captions: chill surfer-bro cadence, plain ELI8 words, friendly. Zero emoji anywhere. No exclamation marks.';
-  }
-
   let forcedClause = '';
   if (forcedHtml) {
     forcedClause =
@@ -224,5 +207,5 @@ function reminderFor({ mode, theme, tone, mobileEnabled, mobileCfg, forcedHtml, 
       'logged-in GitHub session.';
   }
 
-  return COMMON + html + themeClause + toneClause + mobileClause + (toggleNote || '') + (mobileNote || '') + forcedClause;
+  return COMMON + html + themeClause + mobileClause + (toggleNote || '') + (mobileNote || '') + forcedClause;
 }

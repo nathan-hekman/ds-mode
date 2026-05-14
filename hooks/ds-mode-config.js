@@ -1,9 +1,9 @@
 // hooks/ds-mode-config.js — shared utilities for DS Mode hooks.
 //
-// Three independent settings tracked via flag files in $CLAUDE_CONFIG_DIR:
+// Settings tracked via flag files in $CLAUDE_CONFIG_DIR:
 //   .ds-mode-active     mode: lite | full   (absent = off)
 //   .ds-mode-theme      theme: auto | light | dark  (absent = auto)
-//   .ds-mode-tone       tone: default | surfer       (absent = default)
+//   .ds-mode-mobile     mobile mode JSON config (opt-in private GitHub publish)
 //   .ds-mode-installed  sentinel — written on first SessionStart so a
 //                       user-chosen "off" mode survives subsequent sessions.
 
@@ -16,9 +16,6 @@ const DEFAULT_MODE = 'full';
 
 const VALID_THEMES = ['auto', 'light', 'dark'];
 const DEFAULT_THEME = 'auto';
-
-const VALID_TONES = ['default', 'surfer'];
-const DEFAULT_TONE = 'default';
 
 function claudeConfigDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -62,25 +59,6 @@ function readTheme(flagPath) {
 function safeWriteTheme(flagPath, theme) {
   if (!VALID_THEMES.includes(theme)) return false;
   return safeWrite(flagPath, theme);
-}
-
-// ---- tone (default | surfer) ----
-
-function getDefaultTone() {
-  const env = (process.env.DS_MODE_TONE || '').trim().toLowerCase();
-  return VALID_TONES.includes(env) ? env : DEFAULT_TONE;
-}
-
-function readTone(flagPath) {
-  try {
-    const raw = fs.readFileSync(flagPath, 'utf8').trim().toLowerCase();
-    return VALID_TONES.includes(raw) ? raw : null;
-  } catch (e) { return null; }
-}
-
-function safeWriteTone(flagPath, tone) {
-  if (!VALID_TONES.includes(tone)) return false;
-  return safeWrite(flagPath, tone);
 }
 
 // ---- generic safe-write + delete ----
@@ -143,11 +121,9 @@ function mobileIsEnabled(flagPath) {
 module.exports = {
   VALID_MODES, DEFAULT_MODE,
   VALID_THEMES, DEFAULT_THEME,
-  VALID_TONES, DEFAULT_TONE,
   claudeConfigDir,
   getDefaultMode, readMode, safeWriteMode,
   getDefaultTheme, readTheme, safeWriteTheme,
-  getDefaultTone, readTone, safeWriteTone,
   readMobileConfig, writeMobileConfig, mobileIsEnabled,
   deleteFlag,
 };

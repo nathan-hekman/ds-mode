@@ -80,7 +80,6 @@ Content rules (HARD CAPS — count before you send):
 - **No semicolons. No em-dashes splicing two ideas.** One thought per bullet. Period at end.
 - **ELI8, not ELI12.** A second-grader gets it. "Endpoint" → "the part of the server that answers requests". "Refactor" → "rewrite without changing what it does".
 - **Brand label inside the header is always `[ds-mode]` lowercase.** Outside the header, every reference reads "DS Mode" capitalized.
-- **No surfer voice in the bullets.** The body can ride the wave when tone is `surfer`; the TLDR stays plain English so a PM reads it and gets the answer in one pass. "Old orchestrator paddled out clean with SIGINT" is NOT a valid bullet in any tone.
 - TLDR restates only what's above. No new info, no scope creep.
 - **Questions block is conditional.** Include `⚑ Questions for you` ONLY when there is at least one real blocker or must-answer question. If none, OMIT the entire questions block.
 
@@ -88,7 +87,7 @@ Content rules (HARD CAPS — count before you send):
 
 The screenshot regression that motivated this section:
 
-Bad (5 bullets, surfer voice in bullets, jargon, too long):
+Bad (5 bullets, jargon, too long):
 - `Word-boundary check now — "One Piece" cards get the boot, "Bone Pieces" style false friends slide through clean`
 - `Pokemon, MTG, YuGiOh, sports cards all still in the lineup for profit math`
 - `17 test waves ridden, all pass`
@@ -100,7 +99,6 @@ Good (3 bullets, plain English, ≤12 words):
 - `All 17 tests pass.`
 - `The new watcher is running. Old one shut down cleanly.`
 
-If you have surfer mode on and the body is in surfer voice, the body changes; the TLDR doesn't.
 
 (Skip criteria already covered at the top of this section — short status updates, fix confirmations, one-line answers, yes/no, "done" replies, pure tool-call turns. When in doubt: would a PM learn anything from a 3-bullet recap? If no, skip.)
 
@@ -278,7 +276,6 @@ You may not send the reply until you have answered each of these. If any HTML an
    b. Count words in each bullet. Is each one ≤ 12 words? If any bullet is over, rewrite it shorter — do not let a long bullet ship.
    c. Read each bullet aloud. Does it use any term from the jargon blocklist (orchestrator, daemon, WebSocket, SIGINT, kernel, async, cron, regex, endpoint, stamper, tracker, hook, runtime, compiler, payload, socket, process, subprocess, tab, account-on-a-service)? If yes, rewrite plain.
    d. Is each bullet ELI8? A second-grader gets it? If a bullet still reads "engineering," rewrite it for a PM.
-   e. Even in surfer tone, the bullets stay plain English. No "paddled out," no "rode the wave," no surfer cadence in the TLDR.
 7. **Questions section:** include only if real blockers exist. Otherwise omit entirely — no "- none" placeholder. No close-rule dashes.
 8. **Brand label:** every reference outside the header reads "DS Mode".
 

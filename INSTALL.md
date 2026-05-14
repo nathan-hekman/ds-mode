@@ -148,7 +148,6 @@ rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active" "$CLAUDE_CONFIG_DIR/.ds-mode-installe
 |---|---|
 | `$CLAUDE_CONFIG_DIR/.ds-mode-active` | active mode (`lite` or `full`; absent = off) |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-theme` | theme override (`auto`, `light`, `dark`) |
-| `$CLAUDE_CONFIG_DIR/.ds-mode-tone` | tone override (`default`, `surfer` easter egg) |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-mobile` | mobile mode JSON config (repo, clone path, enabled) |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-mobile.log` | mobile-publish background log |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-installed` | sentinel — written on first run so a user-chosen disable state survives subsequent sessions |

@@ -179,9 +179,3 @@ that palette and strips the `@media (prefers-color-scheme: dark)` block
 so the page ignores OS preference. When `/ds-mode auto` is set (default),
 the media query stays. The user can toggle per session.
 
-## Tone overlay (easter egg — surfer)
-
-When `/ds-mode surfer` is active, every label and caption is rewritten in
-a chill surfer-bro voice. ELI8 still applies. Zero emoji anywhere — the
-voice is the whole easter egg. No exclamation marks, no all-caps.
-Captions get shorter, not longer.

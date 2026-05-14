@@ -5,12 +5,10 @@
 //   1. Resolve active mode (lite | full | off). Existing flag wins, else
 //      fall back to getDefaultMode(). First-run sentinel logic preserves a
 //      user-chosen "off" across sessions.
-//   2. Resolve theme (auto | light | dark) and tone (default | surfer) from
-//      their flag files.
+//   2. Resolve theme (auto | light | dark) from its flag file.
 //   3. If mode is on, emit:
-//      - one-line `DS MODE ACTIVE — mode: X · theme: Y · tone: Z`
+//      - one-line `DS MODE ACTIVE — mode: X · theme: Y · version: Z`
 //      - the DS Mode ruleset (filtered to the active mode's table row)
-//      - the surfer overlay ruleset if tone == surfer
 
 const fs = require('fs');
 const path = require('path');
@@ -21,14 +19,12 @@ const {
   getDefaultMode,
   readMode, safeWriteMode,
   getDefaultTheme, readTheme,
-  getDefaultTone, readTone,
   deleteFlag,
 } = require('./ds-mode-config');
 
 const claudeDir = claudeConfigDir();
 const flagPath = path.join(claudeDir, '.ds-mode-active');
 const themePath = path.join(claudeDir, '.ds-mode-theme');
-const tonePath = path.join(claudeDir, '.ds-mode-tone');
 const sentinelPath = path.join(claudeDir, '.ds-mode-installed');
 const updateFlagPath = path.join(claudeDir, '.ds-mode-update-available');
 
@@ -55,7 +51,6 @@ if (existingMode) {
 }
 
 const theme = readTheme(themePath) || getDefaultTheme();
-const tone = readTone(tonePath) || getDefaultTone();
 
 const stamperPath = path.resolve(__dirname, '..', 'templates', 'build.mjs');
 
@@ -66,7 +61,7 @@ const updateLine = renderUpdateLine(installedVersion);
 // session start. The flag we just read was set by a PREVIOUS run.
 spawnUpdateCheck();
 
-const header = `DS MODE ACTIVE — mode: ${mode} · theme: ${theme} · tone: ${tone} · version: ${installedVersion}${updateLine}\nStamper: ${stamperPath}\nThe stamper covers ~80% of one-pager shapes (explainer / comparison / decision / status). For those, invoke it via the absolute path above (do NOT use \${CLAUDE_PLUGIN_ROOT}; that variable is only set inside hook scripts, not the Bash tool). Example: \`node "${stamperPath}" explainer --slots '<json>' --screenshot\`. For shapes outside those four — tree diagrams, timelines, full-bleed hero, unusual tile counts — stamp + post-edit OR hand-write the HTML using the tokens from templates/_shared.css. The stamper is a starting point, not a cage.`;
+const header = `DS MODE ACTIVE — mode: ${mode} · theme: ${theme} · version: ${installedVersion}${updateLine}\nStamper: ${stamperPath}\nThe stamper covers ~80% of one-pager shapes (explainer / comparison / decision / status). For those, invoke it via the absolute path above (do NOT use \${CLAUDE_PLUGIN_ROOT}; that variable is only set inside hook scripts, not the Bash tool). Example: \`node "${stamperPath}" explainer --slots '<json>' --screenshot\`. For shapes outside those four — tree diagrams, timelines, full-bleed hero, unusual tile counts — stamp + post-edit OR hand-write the HTML using the tokens from templates/_shared.css. The stamper is a starting point, not a cage.`;
 
 // ----- main ruleset -----
 const rulePath = path.join(__dirname, '..', 'rules', 'ds-mode.md');
@@ -103,17 +98,7 @@ if (theme === 'dark') {
   themeNote = '\n\n**Active theme: auto.** The one-pager follows the OS dark-mode preference via prefers-color-scheme.';
 }
 
-// ----- tone overlay -----
-let toneOverlay = '';
-if (tone === 'surfer') {
-  const surferPath = path.join(__dirname, '..', 'rules', 'ds-mode-surfer.md');
-  try {
-    const raw = fs.readFileSync(surferPath, 'utf8');
-    toneOverlay = '\n\n---\n\n' + raw.replace(/^---[\s\S]*?---\s*/, '');
-  } catch (e) {}
-}
-
-process.stdout.write(header + '\n\n' + body + themeNote + toneOverlay);
+process.stdout.write(header + '\n\n' + body + themeNote);
 
 // ---------------------------------------------------------------------------
 

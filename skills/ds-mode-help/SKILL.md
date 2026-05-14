@@ -168,7 +168,6 @@ Network failures are silent — a missed check just means you'll find out one se
 |------|---------|
 | `$CLAUDE_CONFIG_DIR/.ds-mode-active` | Flag — active mode (`lite` or `full`). |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-theme` | Theme override (`auto`, `light`, `dark`). |
-| `$CLAUDE_CONFIG_DIR/.ds-mode-tone` | Tone override (`default`, `surfer`). |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-installed` | Sentinel — written on first run so a user-chosen disable state survives sessions. |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-update-check` | Timestamp of the last update check (24h TTL). |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-update-available` | Latest version string when a newer release exists. |
@@ -184,7 +183,6 @@ claude plugin uninstall ds-mode@ds-mode
 claude plugin marketplace remove ds-mode
 rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active" \
       "$CLAUDE_CONFIG_DIR/.ds-mode-theme" \
-      "$CLAUDE_CONFIG_DIR/.ds-mode-tone" \
       "$CLAUDE_CONFIG_DIR/.ds-mode-installed"
 ```
 
