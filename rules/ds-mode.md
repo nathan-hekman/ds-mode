@@ -114,9 +114,38 @@ This is the rule that matters most. The whole point of the one-pager is that a P
 - **No bullet lists or paragraphs as the primary content.** Convert prose to captioned diagrams. Short bullet lists (≤ 3 items, ≤ 8 words each) are allowed only when a diagram genuinely can't carry the idea — but you should reach for an SVG first every time.
 - **No tables.** Use side-by-side illustrated tiles instead.
 - **Plain English in captions.** ELI8 still applies. "Talks to the database" not "issues SQL queries against the persistence layer." If a tech term must appear, gloss it in the same caption.
-- **Restrained, classy aesthetic.** Single muted color line-art (charcoal `#2a2a2a` on cream `#faf7f0`), generous whitespace, system font stack only. No gradients, no AI-slop glow, no rainbow chips, no emoji walls, no exclamation marks in headings, no all-caps shouting.
+- **Restrained, classy aesthetic.** Single muted color line-art, generous whitespace, system font stack only. No gradients, no AI-slop glow, no rainbow chips, no emoji walls, no exclamation marks in headings, no all-caps shouting.
+- **Dark mode is mandatory.** Drive the palette via CSS custom properties on `:root` so the page adapts to the OS preference automatically. SVG strokes/fills MUST use `currentColor` (not hardcoded hex) so the diagrams invert with the page.
+  - **Light palette:** ink `#2a2a2a` on cream `#faf7f0`, muted `#6b6b66`, accent `#b85c2a` (use sparingly).
+  - **Dark palette:** ink `#e8e4dc` on near-black `#1a1a1a`, muted `#8a8580`, accent `#d28258`.
+  - Toggle with `@media (prefers-color-scheme: dark) { :root { --ink: ...; --bg: ...; } }`.
 - **One printed page max.** Target ≤ 750px tall at 1024px wide. If content overflows, cut concepts — never shrink type below 14px, never add scroll.
 - **Self-contained single file.** Inline CSS, inline SVG, no external fonts (system stack: `-apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif`), no JS, no CDN. Plain HTML5.
+
+### CSS skeleton (copy-paste starting point)
+
+```css
+:root {
+  --ink: #2a2a2a;
+  --bg: #faf7f0;
+  --muted: #6b6b66;
+  --accent: #b85c2a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8e4dc;
+    --bg: #1a1a1a;
+    --muted: #8a8580;
+    --accent: #d28258;
+  }
+}
+html, body { background: var(--bg); color: var(--ink); }
+/* SVG inherits via currentColor: stroke="currentColor" fill="currentColor" */
+.muted { color: var(--muted); }
+.accent { color: var(--accent); }
+```
+
+Inside SVG elements, use `stroke="currentColor"` for line-art and `fill="currentColor"` (or `fill="none"`) — never hardcode `#2a2a2a` or any hex on stroke/fill attributes, or the diagrams break in dark mode.
 
 ### Layout pattern (use as a default scaffold)
 
