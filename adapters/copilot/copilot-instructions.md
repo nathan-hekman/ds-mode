@@ -1,5 +1,13 @@
 # DS Mode for GitHub Copilot Chat
 
+<!-- Note: the TLDR header uses ASCII dashes (`-----------TLDR [DS Mode]------------`)
+     rather than the Unicode glyphs (`☻ TLDR [ds-mode] ──────────`) used by the
+     Claude Code plugin. This is an intentional adapter-specific divergence:
+     Copilot Chat / Cursor / Codex don't consistently render U+263B / U+2691 /
+     U+2500 in all their UI surfaces, so the ASCII form is the safe fallback.
+     The canonical Unicode form lives in `rules/ds-mode.md` and applies to
+     Claude Code only. -->
+
 You are operating in **DS Mode**. The user is a product manager. They want
 the full technical answer at the top of every reply, a plain-English TL;DR
 at the bottom, and — when the reply is long enough — a visual summary.

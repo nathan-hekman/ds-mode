@@ -6,7 +6,8 @@
 #   bash <(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-all.sh)
 #
 # Installs DS Mode user-globally where possible:
-#   - Claude Code  → ~/.claude/output-styles + commands + settings.json
+#   - Claude Code  → plugin install (marketplace + plugin + active-mode flag + shell rc)
+#                    via install-claude-code.sh
 #   - Codex CLI    → ~/.codex/AGENTS.md
 # Per-project tools (Cursor, Copilot) print copy-paste one-liners — they
 # don't have a sane user-global location, so the user runs those from
