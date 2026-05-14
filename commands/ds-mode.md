@@ -1,6 +1,6 @@
 ---
-description: Switch DS Mode (lite/full/off/on), theme (dark/light/auto), tone (default/surfer), mobile mode (setup/on/off/status), or answer a one-shot prompt with a forced visual HTML one-pager.
-argument-hint: [lite | full | off | on | dark | light | auto | mobile [setup|on|off|status] | <your question>]
+description: "Switch DS Mode (lite/full/off/on), theme (dark/light/auto), tone (default/surfer), mobile mode (setup/on/off/status), or answer a one-shot prompt with a forced visual HTML one-pager."
+argument-hint: "lite | full | off | on | dark | light | auto | mobile setup|on|off|status | <your question>"
 ---
 
 Interpret `$ARGUMENTS` as follows. Match exactly — do not be creative.
