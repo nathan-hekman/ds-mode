@@ -85,13 +85,32 @@ export DS_MODE_THEME=light     # default theme to light
 
 Add to your shell rc to make it stick. The installer can write these for you with `./install.sh --default-mode lite`, `./install.sh --default-off`, etc.
 
+## Updates
+
+DS Mode checks GitHub once every 24 hours for a newer plugin release in the background. When a newer version is available you'll see two ambient hints — never in the answer:
+
+- The statusline chip becomes `DS:full ↑` (or `DS:lite ↑`) — the up-arrow is the "update available" mark.
+- The SessionStart context shows a one-line note: `DS Mode vX.Y.Z is available — run \`claude plugin update ds-mode@ds-mode\` and restart Claude Code to pick it up.`
+
+The TLDR block never mentions updates. Update messaging stays in the chrome, not in the content. To take the update:
+
+```bash
+claude plugin update ds-mode@ds-mode
+# then restart Claude Code (or start a new session) so the new SessionStart hook fires
+```
+
+Network failures are silent — a missed check just means you'll find out one session later. To disable the check entirely, delete the cache file: `rm $CLAUDE_CONFIG_DIR/.ds-mode-update-check`. (It will re-create on next session unless you also `chmod 000` the directory or set `DS_MODE_NO_UPDATE_CHECK=1` — TODO if there's demand.)
+
 ## Where files go
 
 | Path | Purpose |
 |------|---------|
 | `$CLAUDE_CONFIG_DIR/.ds-mode-active` | Flag — active mode (`lite` or `full`). |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-theme` | Theme override (`auto`, `light`, `dark`). |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-tone` | Tone override (`default`, `surfer`). |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-installed` | Sentinel — written on first run so a user-chosen disable state survives sessions. |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-update-check` | Timestamp of the last update check (24h TTL). |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-update-available` | Latest version string when a newer release exists. |
 | `$TMPDIR/dsmode-summary-<timestamp>.html` | Auto-generated one-pagers (ephemeral). |
 | `$TMPDIR/dsmode-summary-<timestamp>.png` | Sibling screenshot when the stamper was called with `--screenshot`. |
 
