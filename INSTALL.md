@@ -81,9 +81,55 @@ In Claude Code, the next session should open with `DS MODE ACTIVE — mode: full
 | `/ds-mode lite` | TLDR only, no HTML |
 | `/ds-mode full` | TLDR + auto HTML when triggers fire |
 | `/ds-mode off` | disable for this session |
+| `/ds-mode dark` / `light` / `auto` | pin the HTML theme (or follow OS) |
+| `/ds-mode mobile setup` | one-time wizard for mobile mode (see below) |
+| `/ds-mode mobile on` / `off` / `status` | toggle / inspect mobile-mode publishing |
 | `/ds-mode <your question>` | answer the question + force the visual HTML one-pager (works in lite and full) |
 
-State persists across sessions in `$CLAUDE_CONFIG_DIR/.ds-mode-active`.
+State persists across sessions in `$CLAUDE_CONFIG_DIR/.ds-mode-active` (mode), `.ds-mode-theme` (theme), and `.ds-mode-mobile` (mobile config).
+
+## Mobile mode — prerequisites
+
+Mobile mode publishes generated one-pagers to a private GitHub repo so you can view them on your phone (only you, via your authenticated GitHub session). It's off by default and requires a one-time setup.
+
+**Prerequisites before you run `/ds-mode mobile setup`:**
+
+- `gh` CLI installed: `brew install gh` (macOS) or https://cli.github.com/
+- Authenticated: `gh auth login`
+- A GitHub account with permission to create private repos (free tier is fine)
+
+**What setup does:**
+
+1. Verifies `gh` is authenticated.
+2. Creates a private repo `<your-github-user>/ds-mode-mobile` (or reuses an existing one).
+3. Clones it to `$CLAUDE_CONFIG_DIR/ds-mode-mobile/`.
+4. Writes the JSON config to `$CLAUDE_CONFIG_DIR/.ds-mode-mobile` with `enabled: true`.
+
+After setup, every visual one-pager auto-publishes to that repo in the background (~1–3s git push). Your reply includes a tappable URL of the form `https://github.com/<you>/ds-mode-mobile/blob/main/<file>.png`. The repo is private, so the URL only resolves for your authenticated session.
+
+**Pause without losing config:**
+
+```
+/ds-mode mobile off
+```
+
+The config is preserved; `/ds-mode mobile on` re-enables without re-running setup.
+
+## Update detection
+
+DS Mode pings the GitHub Releases API once every 24 hours in the background to check for newer plugin releases. When one's available you'll see two ambient signals:
+
+- The statusline chip becomes `DS:full ↑` (the up-arrow means "update available").
+- The SessionStart context appends one line: `DS Mode vX.Y.Z is available — run \`claude plugin update ds-mode@ds-mode\` and restart Claude Code to pick it up.`
+
+The TLDR block never mentions updates. To take the update:
+
+```bash
+claude plugin update ds-mode@ds-mode
+# then restart Claude Code (or start a new session) to load the new SessionStart hook
+```
+
+Network failures are silent — a missed check just means you'll find out one session later. The cache file at `$CLAUDE_CONFIG_DIR/.ds-mode-update-check` enforces the 24h TTL; delete it to force a re-check on the next session.
 
 ## Uninstall
 
@@ -101,11 +147,19 @@ rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active" "$CLAUDE_CONFIG_DIR/.ds-mode-installe
 | Path | Purpose |
 |---|---|
 | `$CLAUDE_CONFIG_DIR/.ds-mode-active` | active mode (`lite` or `full`; absent = off) |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-theme` | theme override (`auto`, `light`, `dark`) |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-tone` | tone override (`default`, `surfer` easter egg) |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-mobile` | mobile mode JSON config (repo, clone path, enabled) |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-mobile.log` | mobile-publish background log |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-installed` | sentinel — written on first run so a user-chosen disable state survives subsequent sessions |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-update-check` | timestamp of the last update check (24h TTL) |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-update-available` | latest version string when a newer release exists |
+| `$CLAUDE_CONFIG_DIR/ds-mode-mobile/` | local clone of your private mobile repo (mobile mode only) |
 | `$CLAUDE_CONFIG_DIR/settings.json.bak.preDSmode` | one-time backup of pre-install settings.json |
 | `$TMPDIR/dsmode-summary-<ts>.html` | auto one-pagers fired during normal chat (ephemeral) |
+| `$TMPDIR/dsmode-summary-<ts>.png` | sibling screenshot when stamper called with `--screenshot` |
 
-The plugin never writes into your project repo or homedir without explicit opt-in.
+The plugin never writes into your project repo or homedir without explicit opt-in. Mobile-mode publishing is the one place data leaves your machine, and only when you've explicitly run `/ds-mode mobile setup` — and even then it goes to YOUR private repo, owner-only.
 
 ## Other tools (Cursor, Copilot, Codex)
 

@@ -73,6 +73,43 @@ The visual one-pager adapts to your OS dark-mode preference by default. You can 
 
 Theme persists in `$CLAUDE_CONFIG_DIR/.ds-mode-theme`.
 
+## Mobile mode (private GitHub publish)
+
+Off by default. When enabled, every visual one-pager auto-publishes to a **private GitHub repo owned by you**, and the reply includes a tappable URL. On your phone, log into GitHub once (Safari or the GitHub mobile app) and the image renders inline — no one else can see it.
+
+Setup (one-time):
+
+```
+/ds-mode mobile setup
+```
+
+The wizard verifies your `gh` CLI auth, creates `<your-github-user>/ds-mode-mobile` as a **private** repo, clones it locally, and writes the config. After that, every stamped one-pager publishes in the background (~1–3s). The URL pattern is `github.com/<you>/ds-mode-mobile/blob/main/<file>.png` — requires your GitHub session to view, so it's effectively owner-only.
+
+Toggle:
+
+```
+/ds-mode mobile on        # re-enable after off (no re-setup)
+/ds-mode mobile off       # pause publishing (config preserved)
+/ds-mode mobile status    # show current state
+```
+
+Requires `gh` CLI installed (`brew install gh`) and `gh auth login` completed. Free GitHub accounts can create private repos. See [INSTALL.md](./INSTALL.md#mobile-mode-prerequisites) for the full prereq list.
+
+## Update detection
+
+DS Mode pings GitHub once a day in the background to check for newer plugin releases. When one's available you see two ambient signals — never in the TLDR:
+
+- The statusline chip becomes `DS:full ↑` (the up-arrow means "update available").
+- The SessionStart context shows one line: `DS Mode vX.Y.Z is available — run claude plugin update ds-mode@ds-mode and restart Claude Code to pick it up.`
+
+Take the update with:
+
+```bash
+claude plugin update ds-mode@ds-mode
+```
+
+Network failures are silent — a missed check just means you find out one session later.
+
 ## Install
 
 **Pure Claude Code commands (recommended):**
@@ -105,8 +142,12 @@ See [INSTALL.md](./INSTALL.md) for advanced flags, local-clone install, and unin
 |---|:-:|:-:|:-:|:-:|
 | Plain-English TLDR at bottom of replies | Y | Y* | Y* | Y* |
 | Visual HTML one-pager when reply is decent length | Y | Y* | markdown fallback | Y* |
+| Four ready-made templates (explainer, comparison, decision, status) + reusable SVG stencils | Y | — | — | — |
 | `/ds-mode <your question>` — forced visual one-pager | Y | — | — | — |
 | Mode switching (`lite` / `full` / `off`) | Y | — | — | — |
+| Theme override (`/ds-mode dark` / `light` / `auto`) | Y | — | — | — |
+| Mobile mode — auto-publish to your private GitHub repo, tappable from phone | Y | — | — | — |
+| Update detection — passive `↑` chip when newer version exists | Y | — | — | — |
 | Statusline `DS:<mode>` chip when active | Y | — | — | — |
 | `/ds-mode-help` (quick-reference card) | Y | — | — | — |
 
@@ -122,6 +163,8 @@ When you want explicit control:
 - `/ds-mode full` — TLDR + auto HTML.
 - `/ds-mode off` — disable for this session.
 - `/ds-mode on` — re-enable at the default mode.
+- `/ds-mode dark` / `/ds-mode light` / `/ds-mode auto` — pin or auto-follow OS theme for the HTML.
+- `/ds-mode mobile setup` — one-time wizard that enables private-GitHub publishing for mobile viewing (see "Mobile mode" above). Toggle with `/ds-mode mobile on` and `/ds-mode mobile off`.
 - `/ds-mode Explain how the architecture works` — answer this question under DS Mode rules **and force the visual HTML one-pager** for this turn, even in lite mode. The "show me visually" lever.
 - `/ds-mode-help` — show the quick-reference card.
 
