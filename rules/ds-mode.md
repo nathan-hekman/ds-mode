@@ -57,32 +57,50 @@ Render examples (TLDR required):
 When you do render it:
 
 ```
-☻ TLDR [ds-mode] ──────────
+☻ TLDR [ds-mode]
 - [bullet 1: short, plain English, no jargon]
 - [bullet 2: same]
 - [bullet 3: same, optional, max 3 total]
-───────────────
 
 ⚑ Questions for you
 - [question 1: simple, with options if applicable e.g. "A) X  B) Y  C) other"]
-───────────────
 ```
 
 Format rules:
-- **Open header literal:** `☻ TLDR [ds-mode] ──────────` (dark-smiley U+263B, space, `TLDR`, space, `[ds-mode]` in lowercase brackets, space, 10 × U+2500). No bold, no markdown heading. The dashes are intentionally short so the header does not wrap on narrow mobile viewports (Claude's mobile app renders U+2500 wider than expected).
-- **Close rule literal:** 15 × U+2500. Short on purpose — long rules wrap on mobile and look broken. A short visible separator is plenty.
-- **Questions header literal:** `⚑ Questions for you` (black-flag U+2691). **No rule on the same line.** Closing rule below the question list is the same 15 × U+2500 line.
+- **Open header literal:** `☻ TLDR [ds-mode]` (dark-smiley U+263B, space, `TLDR`, space, `[ds-mode]` in lowercase brackets). **No dashes after the header. No close-rule line below the bullets.** Earlier versions added box-drawing dashes (U+2500) as visual separators; Claude's mobile renderer interprets dash runs as markdown table-divider syntax and emits literal `<tr><td>` text in the rendered output. The header chip alone is enough — bullets sit directly under it, no trailing rule.
+- **Questions header literal:** `⚑ Questions for you` (black-flag U+2691). **No rule on the same line, no rule under the questions.** Same reason — dashes break.
 - **Bottom only.** TLDR sits at the very bottom — never top, never middle.
 
-Content rules:
-- **MAX 3 bullets. MAX 12 words per bullet.** Hard cap.
+Content rules (HARD CAPS — count before you send):
+- **MAX 3 bullets.** Count them. If you have 4 or 5, delete bullets until exactly 3 remain. Pick the three most important.
+- **MAX 12 words per bullet.** Count words in each bullet. If any bullet runs over 12 words, rewrite it shorter. If you can't fit the meaning in 12 words, the meaning is too narrow for the TLDR — generalize until it fits.
+- **NO jargon.** A non-technical PM reads the TLDR. Concrete blocker list: `orchestrator`, `daemon`, `WebSocket`, `SIGINT`, `kernel`, `async`, `cron`, `regex`, `endpoint`, `stamper`, `tracker`, `hook`, `runtime`, `compiler`, `payload`, `socket`, `process`, `subprocess`, `tab`, `account` (when meaning a user account on a service), and anything else with the texture of an engineering term. If a bullet contains any of these, rewrite without it. ("WebSocket monitor spins up" → "the watcher starts up." "SIGINT" → "shut down cleanly." "orchestrator" → "the controller" or just "it.") This is the most-broken rule in practice; treat it as the bar that catches everything else.
 - **No equations. No code. No file paths. No version numbers. No dates.** The TLDR paraphrases ("mass and energy are the same stuff").
 - **No proper nouns unless absolutely required.** Replace with the everyday concept.
 - **No semicolons. No em-dashes splicing two ideas.** One thought per bullet. Period at end.
 - **ELI8, not ELI12.** A second-grader gets it. "Endpoint" → "the part of the server that answers requests". "Refactor" → "rewrite without changing what it does".
 - **Brand label inside the header is always `[ds-mode]` lowercase.** Outside the header, every reference reads "DS Mode" capitalized.
+- **No surfer voice in the bullets.** The body can ride the wave when tone is `surfer`; the TLDR stays plain English so a PM reads it and gets the answer in one pass. "Old orchestrator paddled out clean with SIGINT" is NOT a valid bullet in any tone.
 - TLDR restates only what's above. No new info, no scope creep.
-- **Questions block is conditional.** Include `⚑ Questions for you` + its closing rule ONLY when there is at least one real blocker or must-answer question. If none, OMIT the entire questions block.
+- **Questions block is conditional.** Include `⚑ Questions for you` ONLY when there is at least one real blocker or must-answer question. If none, OMIT the entire questions block.
+
+### Concrete bad vs good
+
+The screenshot regression that motivated this section:
+
+Bad (5 bullets, surfer voice in bullets, jargon, too long):
+- `Word-boundary check now — "One Piece" cards get the boot, "Bone Pieces" style false friends slide through clean`
+- `Pokemon, MTG, YuGiOh, sports cards all still in the lineup for profit math`
+- `17 test waves ridden, all pass`
+- `Old orchestrator paddled out clean with SIGINT, new one already running in same tab with both accounts dialed in`
+- `New WebSocket monitor spins up fresh inside orchestrator, so realtime blocklist is live too`
+
+Good (3 bullets, plain English, ≤12 words):
+- `"One Piece" cards now skipped. Other game cards still scored.`
+- `All 17 tests pass.`
+- `The new watcher is running. Old one shut down cleanly.`
+
+If you have surfer mode on and the body is in surfer voice, the body changes; the TLDR doesn't.
 
 (Skip criteria already covered at the top of this section — short status updates, fix confirmations, one-line answers, yes/no, "done" replies, pure tool-call turns. When in doubt: would a PM learn anything from a 3-bullet recap? If no, skip.)
 
@@ -254,9 +272,14 @@ You may not send the reply until you have answered each of these. If any HTML an
 2. **HTML — visual, not text-blocks?** Hero SVG at top + illustrated tiles for each concept. No bullet lists or paragraphs as primary content. No tables. Captions are short and plain English.
 3. **HTML — did I `open` it?** Ran `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` via the Bash tool, exit code 0.
 4. **HTML — mentioned in reply?** Exactly one sentence above the TLDR: "Opened a one-page visual summary in your browser."
-5. **TLDR present?** Response > 3 sentences or technical → TLDR block at bottom with the literal header.
-6. **TLDR clean?** ≤ 3 bullets, ≤ 12 words each, no equations, no proper nouns, no semicolons.
-7. **Questions section:** include only if real blockers exist. Otherwise omit entirely — no "- none" placeholder.
+5. **TLDR present?** Response > 3 sentences or technical → TLDR block at bottom with the literal header `☻ TLDR [ds-mode]`. No dashes after the header. No close-rule line under the bullets.
+6. **TLDR shape — count out loud:**
+   a. Count bullets. Is the number exactly ≤ 3? If 4 or 5, delete bullets until 3.
+   b. Count words in each bullet. Is each one ≤ 12 words? If any bullet is over, rewrite it shorter — do not let a long bullet ship.
+   c. Read each bullet aloud. Does it use any term from the jargon blocklist (orchestrator, daemon, WebSocket, SIGINT, kernel, async, cron, regex, endpoint, stamper, tracker, hook, runtime, compiler, payload, socket, process, subprocess, tab, account-on-a-service)? If yes, rewrite plain.
+   d. Is each bullet ELI8? A second-grader gets it? If a bullet still reads "engineering," rewrite it for a PM.
+   e. Even in surfer tone, the bullets stay plain English. No "paddled out," no "rode the wave," no surfer cadence in the TLDR.
+7. **Questions section:** include only if real blockers exist. Otherwise omit entirely — no "- none" placeholder. No close-rule dashes.
 8. **Brand label:** every reference outside the header reads "DS Mode".
 
-The HTML failing to fire — or firing as a wall of text — is the #1 way this mode breaks. Treat 1–4 as the most important checks in the file.
+The HTML failing to fire — or firing as a wall of text — is the #1 way this mode breaks. The TLDR running long with jargon is #2. Treat 1–4 and 6 as the most important checks in the file. Items 6a–6c are LITERAL counting/checking steps; do them on every TLDR you draft.

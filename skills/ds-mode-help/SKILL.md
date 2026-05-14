@@ -19,18 +19,16 @@ DS Mode is **active by default** once installed (mode = `full`).
 ### What the TLDR block looks like
 
 ```
-☻ TLDR [ds-mode] ──────────
+☻ TLDR [ds-mode]
 - short plain-English point
 - another point
 - one more, max three
-───────────────
 
 ⚑ Questions for you
 - A) option one  B) option two  C) defer
-───────────────
 ```
 
-The `⚑ Questions for you` block only appears when there's a real blocker.
+Three bullets max, twelve words each, ELI8 — a non-technical reader gets it in one pass. The `⚑ Questions for you` block only appears when there's a real blocker. No dashes anywhere in the block; Claude mobile's renderer parses dash runs as table-divider syntax and breaks the output.
 
 ## Modes
 

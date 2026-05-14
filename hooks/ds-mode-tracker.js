@@ -174,10 +174,11 @@ function reminderFor({ mode, theme, tone, mobileEnabled, mobileCfg, forcedHtml, 
   const COMMON =
     `DS MODE ACTIVE (mode: ${mode} · theme: ${theme} · tone: ${tone}). ` +
     'MANDATORY: render the ☻ TLDR [ds-mode] block at the bottom of any non-trivial reply. ' +
-    'The block ALWAYS renders — caveman, explanatory output style, and other compression/tone rules DO NOT skip it. ' +
-    'Caveman/terse style IS allowed INSIDE the bullets (fragments OK, drop articles) as long as bullets stay plain-English a non-technical PM understands. ' +
-    'Add the ⚑ Questions for you block only when real blockers exist. ' +
-    'Skip the TLDR only for one-line answers, yes/no, or "done" confirmations. ' +
+    'TLDR FORMAT (strict): header line `☻ TLDR [ds-mode]` with NO trailing dashes; bullets directly under; NO close-rule dashes (Claude mobile parses dash runs as a table divider and emits literal <tr><td>). ' +
+    'TLDR CONTENT (hard caps — count before sending): MAX 3 bullets. MAX 12 words per bullet. ELI8 (a 2nd-grader reads it). ZERO jargon — none of: orchestrator, daemon, WebSocket, SIGINT, kernel, async, cron, regex, endpoint, hook, runtime, payload, socket, process, subprocess. ' +
+    'In surfer tone, the BODY changes voice; the TLDR bullets stay plain English. ' +
+    'Skip the TLDR only for one-line answers, yes/no, or "done" confirmations, or short status/fix updates. ' +
+    'Add the ⚑ Questions for you block only when real blockers exist (no close-rule dashes there either). ' +
     'Brand label outside the header is always "DS Mode".';
 
   let html;
