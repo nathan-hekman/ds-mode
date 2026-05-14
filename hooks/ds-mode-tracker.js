@@ -111,7 +111,8 @@ function reminderFor({ mode, theme, tone, forcedHtml, toggleNote }) {
       ' Visual HTML one-pager fires when reply is a decent length ' +
       '(≥~300 words, 2+ headings, multi-part concept, code+narrative, A/B decision). ' +
       'The HTML must be illustration-first: hero SVG + captioned tiles, NOT bullet lists or paragraph blocks. ' +
-      `Use the stamper (\`node "${stamperPath}" <kind> --slots '<json>' --screenshot\`) rather than hand-writing inline HTML. Tile captions ≤ 12 words. ELI8.`;
+      `For the common 4 shapes (explainer / comparison / decision / status) use the stamper: \`node "${stamperPath}" <kind> --slots '<json>' --screenshot\`. ` +
+      'For shapes outside those four — tree diagrams, timelines, full-bleed hero, unusual tile counts — either stamp + post-edit, OR hand-write the HTML using the same tokens from `templates/_shared.css`. The stamper is a starting point, not a cage. Tile captions ≤ 12 words. ELI8.';
   } else {
     html =
       ' Lite mode: NO HTML one-pager unless user explicitly invokes /ds-mode <prompt>. ' +

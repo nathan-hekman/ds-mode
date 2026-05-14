@@ -105,28 +105,42 @@ The HTML build rule depends on the active mode.
 
 **Exception (both modes):** if the user invoked `/ds-mode <prompt>`, the HTML one-pager is **mandatory for this one turn regardless of mode and regardless of length**. This is the explicit "show me visually" override — lite users get a one-shot picture without leaving lite mode.
 
-### Use the stamper, not inline HTML
+### Templates: starting points, not cages
 
-**Build one-pagers via `templates/build.mjs`, not by writing ~300 lines of inline HTML in the Write tool.** The stamper is faster (5× fewer tokens generated), keeps every page on-system (typography, palette, layout), and handles theme overrides for you.
+**Prefer the stamper for the common case, but it's a starting point — not a mandate.** The four templates cover ~80% of one-pager shapes. When a reply genuinely needs a different layout, write the HTML directly or stamp + extend.
 
-Workflow:
+When the stamper is the right tool (the common case):
 
-1. Pick the template kind that fits the answer:
+1. Pick the template kind closest to the shape you need:
    - `explainer` — how something works (hero + 1–3 captioned tiles)
    - `comparison` — A vs B (two equal columns, no hero)
    - `decision` — a choice was made (recommendation + 2–3 option tiles)
    - `status` — what changed (single hero + 1 short paragraph)
 2. Build a JSON slot object with `eyebrow`, `title`, `deck`, plus the kind-specific slots (see `templates/build.mjs --help`).
-3. For SVGs, prefer reusing a stencil from `templates/stencils/` (replace the placeholder labels) over drawing from scratch.
-4. Invoke the stamper via Bash:
+3. For SVGs, reuse a stencil from `templates/stencils/` when one fits (replace the placeholder labels). When no stencil fits, draw inline.
+4. Invoke the stamper via Bash using the absolute path emitted in the SessionStart header:
    ```
-   node "${CLAUDE_PLUGIN_ROOT}/templates/build.mjs" <kind> --slots '<json>' --screenshot
+   node "<stamper-path>" <kind> --slots '<json>' --screenshot
    ```
-   - The stamper auto-resolves the active theme from `$CLAUDE_CONFIG_DIR/.ds-mode-theme`. If you need to override explicitly, pass `--theme dark|light|auto`.
-   - `--screenshot` writes a sibling `.png` you can attach inline in chat (helpful on Claude mobile).
+   - Theme auto-resolves from `$CLAUDE_CONFIG_DIR/.ds-mode-theme`. Override with `--theme dark|light|auto` if needed.
+   - `--screenshot` writes a sibling `.png` for inline embedding on Claude mobile.
 5. Capture the printed HTML path; `open` it via Bash.
 
-The stamper is the canonical path. Hand-written inline HTML is a fallback only when no template kind fits — and that should be rare.
+When to break out of the templates:
+
+- The reply needs a layout none of the four kinds supports (e.g. a tree diagram, a timeline, a quadrant grid, a single full-bleed illustration with no tile row).
+- A tile needs unusual sizing (a wider middle column, a vertical orientation).
+- The hero is the entire page (no tiles, no body) and `status` doesn't quite fit.
+- A template's slot count is too constraining (4 tiles, 5 options).
+
+Two break-out paths, in order of preference:
+
+1. **Stamp + post-edit.** Run the stamper to get the typography, palette, and footer right, then open the produced HTML and use `Edit` to adjust layout or add extra blocks. You keep the design system; you change the structure.
+2. **Hand-write inline HTML.** Use the `<style>` block from `templates/_shared.css` (system tokens + `prefers-color-scheme` block + display-serif rules), an inline `<svg>` body, and the same `<footer>` shape. Follow `DESIGN.md` for the rules — banned patterns, word caps, tokens — but you own the layout. This is the right call for genuinely novel structures.
+
+**Either path is fine.** The goal is the one-pager honoring the design system (tokens, typography, density, banned patterns), not the stamper being a hard dependency. The stamper exists to make the 80% case fast; it should not be in the way of the 20% case that needs something custom.
+
+If you find yourself fighting a template more than three slot edits in, stop and either post-edit or hand-write. Slot-stuffing a wrong-shape template is worse than writing fresh HTML against the same tokens.
 
 ### Density caps (when filling slots)
 

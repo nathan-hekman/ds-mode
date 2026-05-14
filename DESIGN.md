@@ -116,7 +116,11 @@ Match-and-refuse. Rewrite if you're about to do any of these.
 
 ## Templates
 
-The stamper produces four one-pagers. All share tokens + type + density.
+The stamper produces four one-pagers as **starting points**, not mandates.
+All share tokens + type + density. Hand-written HTML against the same
+tokens is equally valid when a reply needs a layout outside these four
+shapes — see the "break-out" guidance in `rules/ds-mode.md`. The
+templates exist to make the common case fast, not to lock the system.
 
 ### 1. `explainer.html`
 

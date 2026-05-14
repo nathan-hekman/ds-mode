@@ -56,7 +56,7 @@ const theme = readTheme(themePath) || getDefaultTheme();
 const tone = readTone(tonePath) || getDefaultTone();
 
 const stamperPath = path.resolve(__dirname, '..', 'templates', 'build.mjs');
-const header = `DS MODE ACTIVE — mode: ${mode} · theme: ${theme} · tone: ${tone}\nStamper: ${stamperPath}\nWhen the HTML one-pager fires, invoke the stamper at the absolute path above (do NOT use \${CLAUDE_PLUGIN_ROOT}; that variable is only set inside hook scripts, not the Bash tool). Example: \`node "${stamperPath}" explainer --slots '<json>' --screenshot\`.`;
+const header = `DS MODE ACTIVE — mode: ${mode} · theme: ${theme} · tone: ${tone}\nStamper: ${stamperPath}\nThe stamper covers ~80% of one-pager shapes (explainer / comparison / decision / status). For those, invoke it via the absolute path above (do NOT use \${CLAUDE_PLUGIN_ROOT}; that variable is only set inside hook scripts, not the Bash tool). Example: \`node "${stamperPath}" explainer --slots '<json>' --screenshot\`. For shapes outside those four — tree diagrams, timelines, full-bleed hero, unusual tile counts — stamp + post-edit OR hand-write the HTML using the tokens from templates/_shared.css. The stamper is a starting point, not a cage.`;
 
 // ----- main ruleset -----
 const rulePath = path.join(__dirname, '..', 'rules', 'ds-mode.md');
