@@ -272,6 +272,11 @@ function takeScreenshot(htmlPath, pngPath) {
     '--disable-gpu',
     `--screenshot=${pngPath}`,
     '--window-size=1024,820',
+    // Render at 2× device pixel ratio so the PNG is sharp on Retina
+    // displays and phone screens. Adds <50ms to render time on modern
+    // hardware (compositor handles DPR cheaply); output file grows ~4×
+    // in bytes but still <200KB for a typical one-pager.
+    '--force-device-scale-factor=2',
     '--hide-scrollbars',
     '--virtual-time-budget=1500',
     `file://${htmlPath}`,
