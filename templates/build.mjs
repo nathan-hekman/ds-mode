@@ -88,7 +88,7 @@ try {
 
 // -------- paths --------
 const timestamp = new Date()
-  .toISOString().replace(/[-:T]/g, '').slice(0, 15).replace(/Z$/, '')
+  .toISOString().replace(/[-:T]/g, '').slice(0, 14)
   .replace(/(\d{8})(\d{6})/, '$1-$2');
 const tmp = process.env.TMPDIR || tmpdir();
 const outHtml = flags.out
