@@ -182,6 +182,6 @@ the media query stays. The user can toggle per session.
 ## Tone overlay (easter egg — surfer)
 
 When `/ds-mode surfer` is active, every label and caption is rewritten in
-a chill surfer-bro voice. ELI8 still applies. One `🤙` glyph is permitted
-in the eyebrow or footer. Otherwise no emoji, no exclamation marks, no
-all-caps. Captions get shorter, not longer.
+a chill surfer-bro voice. ELI8 still applies. Zero emoji anywhere — the
+voice is the whole easter egg. No exclamation marks, no all-caps.
+Captions get shorter, not longer.

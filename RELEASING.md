@@ -44,7 +44,7 @@ Release assets win on every axis that matters.
 
 ## Voice
 
-- Upbeat but calm. "Yeah, this one's nice." Not "🚀 SHIPPED."
+- Upbeat but calm. "Yeah, this one's nice." Not the rocket-and-confetti SaaS holler.
 - ELI8. A twelve-year-old should grok the bullets.
 - No exclamation marks anywhere.
 - No emoji except the TLDR header glyph or the surfer-tone easter egg.

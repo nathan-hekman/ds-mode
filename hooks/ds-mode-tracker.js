@@ -69,7 +69,7 @@ process.stdin.on('end', () => {
       safeWriteTone(tonePath, argLower);
       toggleNote = ` Tone just switched to "${argLower}".` +
         (argLower === 'surfer'
-          ? ' Surfer overlay rules now apply: chill cadence, plain words, one 🤙 allowed.'
+          ? ' Surfer overlay rules now apply: chill cadence, plain words. Zero emoji.'
           : ' Default voice restored.');
       ensureActive();
     } else if (mobileMatch) {
@@ -203,7 +203,7 @@ function reminderFor({ mode, theme, tone, mobileEnabled, mobileCfg, forcedHtml, 
 
   let toneClause = '';
   if (tone === 'surfer') {
-    toneClause = ' Tone is **surfer** (easter egg). Voice in the body, TLDR, and HTML captions: chill surfer-bro cadence, plain ELI8 words, friendly. One 🤙 allowed in eyebrow or footer only. No exclamation marks. No emoji elsewhere.';
+    toneClause = ' Tone is **surfer** (easter egg). Voice in the body, TLDR, and HTML captions: chill surfer-bro cadence, plain ELI8 words, friendly. Zero emoji anywhere. No exclamation marks.';
   }
 
   let forcedClause = '';
