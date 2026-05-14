@@ -1,6 +1,7 @@
 {
   "name": "ds-mode",
-  "description": "Plain-English TLDR + visual HTML one-pager for non-trivial Claude Code replies. Automatic when active; /ds-mode <prompt> for an explicit, illustration-first one-pager.",
+  "version": "1.0.0",
+  "description": "Plain-English TLDR + visual HTML one-pager for non-trivial Claude Code replies. Modes: lite (TLDR only) | full (TLDR + auto HTML, default) | off. /ds-mode <prompt> forces the visual one-pager in any mode.",
   "author": {
     "name": "Nathan Hekman",
     "url": "https://github.com/nathan-hekman"

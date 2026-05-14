@@ -38,14 +38,28 @@
 
 ---
 
-DS Mode is a system-prompt overlay for AI coding agents. Install it and it just works — no modes to memorize, no flags to fiddle with. It does two things:
+DS Mode is a system-prompt overlay for AI coding agents. Install it, pick `lite` or `full`, and it just works. It does two things:
 
 1. **Adds a plain-English TL;DR to the bottom** of every long or technical reply. Three bullets, twelve words each, no jargon.
-2. **Auto-generates a one-page visual HTML** in your browser when the answer is a decent length. Illustration-first — hero diagram + captioned tiles, not boxes of text.
+2. **Auto-generates a one-page visual HTML** in your browser when the reply is a decent length (full mode only — or any time you explicitly invoke `/ds-mode <question>`). Illustration-first — hero diagram + captioned tiles, not boxes of text.
 
 Built for product managers, founders, and **anyone who'd rather skim a picture than parse a wall of jargon**.
 
 > *For people who skim. Built by one of them.*
+
+## Modes
+
+<p align="center">
+  <img src="docs/assets/modes-diagram.svg" alt="DS Mode has three states: lite (TLDR only), full (TLDR + auto HTML, default), off (silent)." width="560">
+</p>
+
+| Mode | Behavior |
+|------|----------|
+| **lite** | TLDR block only. No HTML one-pager unless you explicitly invoke `/ds-mode <prompt>`. Best for terminal-heavy workflows where browser pop-ups are noise. |
+| **full** | TLDR + auto HTML one-pager when the reply is a decent length (≥ ~300 words, multi-part concept, 2+ headings, code + narrative, A/B decision). **Default.** |
+| **off** | Disabled this session. Hooks emit nothing. |
+
+The active mode persists in `$CLAUDE_CONFIG_DIR/.ds-mode-active`. Switch with `/ds-mode lite` or `/ds-mode full`.
 
 ## Install
 
@@ -58,13 +72,18 @@ claude plugin install ds-mode@ds-mode
 
 DS Mode now appears in `claude plugin list` and in Claude Code's desktop plugin UI. Restart Claude Code to activate.
 
-**One-line install with extras** (sets `DS_MODE_DEFAULT=on` in your shell rc, strips the legacy `outputStyle` setting):
+**One-line install with extras** (sets `DS_MODE_DEFAULT` in your shell rc, strips the legacy `outputStyle` setting):
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-claude-code.sh)
 ```
 
-DS Mode is on by default in every new session. Toggle per-session with `/ds-mode off` and `/ds-mode on`.
+DS Mode starts in `full` mode by default in every new session. To start in lite or off:
+
+```bash
+./install.sh --default-mode lite     # start in lite mode
+./install.sh --default-off           # install but stay disabled until /ds-mode on
+```
 
 See [INSTALL.md](./INSTALL.md) for advanced flags, local-clone install, and uninstall.
 
@@ -75,33 +94,35 @@ See [INSTALL.md](./INSTALL.md) for advanced flags, local-clone install, and unin
 | Plain-English TLDR at bottom of replies | Y | Y* | Y* | Y* |
 | Visual HTML one-pager when reply is decent length | Y | Y* | markdown fallback | Y* |
 | `/ds-mode <your question>` — forced visual one-pager | Y | — | — | — |
-| `/ds-mode off` / `/ds-mode on` toggle | Y | — | — | — |
-| Statusline `DS` chip when active | Y | — | — | — |
+| Mode switching (`lite` / `full` / `off`) | Y | — | — | — |
+| Statusline `DS:<mode>` chip when active | Y | — | — | — |
 | `/ds-mode-help` (quick-reference card) | Y | — | — | — |
 
 \* Cursor/Codex get the full ruleset via the adapter files in `adapters/` and can run the HTML build themselves (they have shell access). Copilot Chat in standard mode renders a markdown summary instead; in Copilot Workspace agent mode it can build real HTML.
 
 ## Usage
 
-Once installed, DS Mode is automatic on every session. You don't need to do anything — long, technical replies get a plain-English TLDR at the bottom and a visual HTML one-pager pops open in your browser when the answer is long enough.
+Once installed, DS Mode is automatic on every session. Long, technical replies get a plain-English TLDR at the bottom and (in full mode) a visual HTML one-pager pops open in your browser when the answer is a decent length.
 
 When you want explicit control:
 
-- `/ds-mode off` — disable for this session (TLDR + HTML pause).
-- `/ds-mode on` — re-enable for this session.
-- `/ds-mode Explain how the architecture works` — answer this question under DS Mode rules **and force the visual HTML one-pager**, even if the answer is short. This is the "show me visually" lever.
+- `/ds-mode lite` — TLDR only.
+- `/ds-mode full` — TLDR + auto HTML.
+- `/ds-mode off` — disable for this session.
+- `/ds-mode on` — re-enable at the default mode.
+- `/ds-mode Explain how the architecture works` — answer this question under DS Mode rules **and force the visual HTML one-pager** for this turn, even in lite mode. The "show me visually" lever.
 - `/ds-mode-help` — show the quick-reference card.
 
-You can also use natural language: "stop ds mode", "ds mode on", etc.
+Natural language works too: "stop ds mode", "ds mode on", etc.
 
 ## How It Works
 
 DS Mode is a Claude Code plugin (`.claude-plugin/plugin.json`). It registers two hooks:
 
-1. **SessionStart** (`hooks/ds-mode-activate.js`) — activates DS Mode by default and injects `rules/ds-mode.md` as session context. (The ruleset lives in `rules/` instead of `skills/` on purpose so Claude Code doesn't register it as a user-invocable skill — that would clash with the `/ds-mode` command.)
-2. **UserPromptSubmit** (`hooks/ds-mode-tracker.js`) — parses `/ds-mode` commands, handles on/off toggling, and re-anchors a short reminder every turn so the rules survive context compression. When you invoke `/ds-mode <prompt>`, this hook flags the turn as HTML-mandatory.
+1. **SessionStart** (`hooks/ds-mode-activate.js`) — resolves the active mode from `$CLAUDE_CONFIG_DIR/.ds-mode-active`, filters `rules/ds-mode.md` to that mode, and injects the ruleset as session context. (The ruleset lives in `rules/` instead of `skills/` on purpose so Claude Code doesn't register it as a user-invocable skill — that would clash with the `/ds-mode` command.)
+2. **UserPromptSubmit** (`hooks/ds-mode-tracker.js`) — parses `/ds-mode` commands, updates the flag, and re-anchors a short mode-specific reminder every turn so the rules survive context compression. When you invoke `/ds-mode <prompt>`, this hook flags the turn as HTML-mandatory regardless of mode.
 
-State is a single flag file at `$CLAUDE_CONFIG_DIR/.ds-mode-active` — present = active, absent = off. HTML outputs are ephemeral in `$TMPDIR`.
+State is a single flag file at `$CLAUDE_CONFIG_DIR/.ds-mode-active` — contents = mode name (`lite` or `full`), absent = off. HTML outputs are ephemeral in `$TMPDIR`.
 
 ## Other Tools
 

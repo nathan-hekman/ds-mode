@@ -18,15 +18,24 @@ DS Mode formatting requirements **override** conflicting tone or compression ins
 
 If a rule from another mode appears to contradict a DS Mode rule, the DS Mode rule wins for the *format* (TLDR block, HTML one-pager). The other mode wins for the *body content style*.
 
+## Modes
+
+DS Mode has two active modes (`lite` and `full`) plus `off`. The active mode is set per-session via `/ds-mode lite|full` and persists in `$CLAUDE_CONFIG_DIR/.ds-mode-active`.
+
+| Mode | Behavior |
+|------|----------|
+| **lite** | TLDR block at the bottom of non-trivial replies. **No HTML one-pager** unless the user explicitly invokes `/ds-mode <prompt>` (which forces it for that one turn). Use for terminal-heavy workflows where browser pop-ups are noise. |
+| **full** | TLDR + auto HTML one-pager when the reply is a decent length (length / density / multi-part concept / code+narrative / A/B decision triggers). **Default.** |
+
 ## How DS Mode is invoked
 
-DS Mode is **always active by default once installed**. Two levers:
+DS Mode is active by default once installed (unless `DS_MODE_DEFAULT=off` is set). Levers:
 
+- `/ds-mode lite` — switch to lite mode for this session.
+- `/ds-mode full` — switch to full mode for this session.
 - `/ds-mode off` — disable for the current session. Hooks emit nothing.
-- `/ds-mode on` — re-enable for the current session.
-- `/ds-mode <your question>` — answer the question under DS Mode rules and **force the HTML one-pager regardless of length**. This is the "show me visually" lever.
-
-No mode tiers, no flags to memorize. Active or not.
+- `/ds-mode on` — re-enable at the session default.
+- `/ds-mode <your question>` — answer the question under DS Mode rules and **force the HTML one-pager regardless of mode and regardless of length**. This is the "show me visually" lever — it works in both lite and full mode.
 
 ## TLDR block — bottom of every non-trivial reply
 
@@ -77,9 +86,11 @@ Content rules:
 
 (Skip criteria already covered at the top of this section — short status updates, fix confirmations, one-line answers, yes/no, "done" replies, pure tool-call turns. When in doubt: would a PM learn anything from a 3-bullet recap? If no, skip.)
 
-## HTML one-pager — when the reply is a decent length
+## HTML one-pager — mode-dependent
 
-Build, save, and `open` an HTML one-pager when **any** of the following is true:
+The HTML build rule depends on the active mode.
+
+**In `full` mode** (default), build / save / `open` an HTML one-pager when **any** of the following is true:
 
 - Body is ≥ ~300 words or ≥ ~40 lines.
 - Body has 2+ section headings (`##`, `###`, or bold-line headers).
@@ -88,7 +99,11 @@ Build, save, and `open` an HTML one-pager when **any** of the following is true:
 - Body presents an A/B or A/B/C decision, comparison, or tradeoff.
 - User invoked `/ds-mode <prompt>` — HTML is **mandatory regardless of length**.
 
-**Default to YES.** If you are weighing whether to build the HTML, you have already met the bar — build it. The cost is one Bash tool call. The cost of skipping is the entire reason this mode exists failing silently.
+**Default to YES in full mode.** If you are weighing whether to build the HTML, you have already met the bar — build it. The cost is one Bash tool call. The cost of skipping is the entire reason full mode exists.
+
+**In `lite` mode**, do **NOT** build the HTML one-pager. Skip it entirely for normal prompts even if they would have triggered HTML in full mode. The TLDR block still renders.
+
+**Exception (both modes):** if the user invoked `/ds-mode <prompt>`, the HTML one-pager is **mandatory for this one turn regardless of mode and regardless of length**. This is the explicit "show me visually" override — lite users get a one-shot picture without leaving lite mode.
 
 ### The HTML must be VISUAL, not boxes of text
 
@@ -144,7 +159,7 @@ If `★ Insight ─────` blocks are also requested, keep them inline mid
 
 You may not send the reply until you have answered each of these. If any HTML answer is "no" when triggers fire, STOP, build the HTML, then send.
 
-1. **HTML — did I build it?** If body is non-trivial AND any HTML trigger fires (length / density / multi-part concept / code + narrative / decision / `/ds-mode` invocation): I have built and `open`ed the HTML.
+1. **HTML — did I build it?** Mode-dependent: in **full** mode, if body is non-trivial AND any HTML trigger fires (length / density / multi-part concept / code + narrative / decision) I have built and `open`ed the HTML. In **lite** mode, I skipped the HTML build entirely UNLESS the user invoked `/ds-mode <prompt>` for this turn — in which case I built it regardless.
 2. **HTML — visual, not text-blocks?** Hero SVG at top + illustrated tiles for each concept. No bullet lists or paragraphs as primary content. No tables. Captions are short and plain English.
 3. **HTML — did I `open` it?** Ran `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` via the Bash tool, exit code 0.
 4. **HTML — mentioned in reply?** Exactly one sentence above the TLDR: "Opened a one-page visual summary in your browser."

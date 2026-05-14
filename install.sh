@@ -3,14 +3,17 @@
 # DS Mode installer — local clone path
 #
 # Default: register the marketplace + install the plugin via Claude Code's
-#          plugin manager, then activate DS Mode immediately.
+#          plugin manager, then activate DS Mode in `full` mode (default).
 # Flags:
-#   --minimal       Plugin install only (skip flag write).
+#   --minimal       Plugin install only (skip flag write + shell rc).
 #   --plugin-only   Same as --minimal — explicit name parity with caveman.
 #   --dry-run       Print planned actions; write nothing.
 #   --force         Re-run even if the plugin reports already installed.
+#   --default-mode <mode>  Set the install-time mode (lite | full). Default: full.
+#                          Exports DS_MODE_DEFAULT in your shell rc so future
+#                          sessions inherit it.
 #   --default-off   Install but start sessions disabled by default
-#                   (writes DS_MODE_DEFAULT=off to shell rc, skips flag write).
+#                   (sets DS_MODE_DEFAULT=off in shell rc, skips flag write).
 #   --help|-h       Print this help and exit.
 #
 # Requires:
@@ -31,6 +34,7 @@ SENTINEL_FILE="$CLAUDE_DIR/.ds-mode-installed"
 MINIMAL=0
 DRY=0
 FORCE=0
+DEFAULT_MODE="full"
 DEFAULT_OFF=0
 
 while [[ $# -gt 0 ]]; do
@@ -38,6 +42,7 @@ while [[ $# -gt 0 ]]; do
     --minimal|--plugin-only) MINIMAL=1; shift ;;
     --dry-run) DRY=1; shift ;;
     --force) FORCE=1; shift ;;
+    --default-mode) DEFAULT_MODE="$2"; shift 2 ;;
     --default-off) DEFAULT_OFF=1; shift ;;
     --help|-h)
       sed -n '2,/^set -e/p' "$0" | sed 's/^# \{0,1\}//;/^set -e/d'
@@ -46,6 +51,9 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
+
+case "$DEFAULT_MODE" in lite|full) ;; *)
+  echo "Error: --default-mode must be lite | full" >&2; exit 1 ;; esac
 
 if ! command -v claude >/dev/null 2>&1; then
   echo "Error: 'claude' CLI not found on PATH. Install Claude Code first." >&2
@@ -59,9 +67,9 @@ run() {
 echo "DS Mode installer"
 echo "  target:       $CLAUDE_DIR"
 if [[ "$DEFAULT_OFF" -eq 1 ]]; then
-  echo "  start state:  disabled (DS_MODE_DEFAULT=off)"
+  echo "  start state:  disabled (DS_MODE_DEFAULT=off in shell rc)"
 else
-  echo "  start state:  active"
+  echo "  start state:  active, mode = $DEFAULT_MODE"
 fi
 echo "  repo:         github:$REPO"
 echo
@@ -115,20 +123,29 @@ PY
   fi
 fi
 
-# 4. Write flag file (active) and sentinel — unless --minimal or --default-off.
+# 4. Write flag file with the chosen mode (+ sentinel) — unless --minimal or --default-off.
 if [[ "$MINIMAL" -ne 1 && "$DEFAULT_OFF" -ne 1 ]]; then
-  run "echo on > \"$FLAG_FILE\""
+  run "echo \"$DEFAULT_MODE\" > \"$FLAG_FILE\""
   run "echo 1 > \"$SENTINEL_FILE\""
-  echo "  ✓ DS Mode is active ($FLAG_FILE)"
+  echo "  ✓ DS Mode is active (mode=$DEFAULT_MODE)"
 fi
 
-# 5. If --default-off, persist that as the env-var default in shell rc.
-if [[ "$DEFAULT_OFF" -eq 1 ]]; then
+# 5. Add DS_MODE_DEFAULT export to shell rc so future sessions inherit it.
+if [[ "$MINIMAL" -ne 1 ]]; then
+  if [[ "$DEFAULT_OFF" -eq 1 ]]; then
+    export_value="off"
+  else
+    export_value="$DEFAULT_MODE"
+  fi
   for rc in "$HOME/.zshenv" "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile"; do
     [[ -f "$rc" ]] || continue
-    if ! grep -q 'DS_MODE_DEFAULT' "$rc" 2>/dev/null; then
-      run "echo 'export DS_MODE_DEFAULT=\"off\"' >> \"$rc\""
-      echo "  ✓ added DS_MODE_DEFAULT=off to $rc"
+    if grep -q '^export DS_MODE_DEFAULT=' "$rc" 2>/dev/null; then
+      # Replace existing line in-place.
+      run "sed -i.bak.preDSmode 's|^export DS_MODE_DEFAULT=.*|export DS_MODE_DEFAULT=\"$export_value\"|' \"$rc\""
+      echo "  ✓ updated DS_MODE_DEFAULT=$export_value in $rc"
+    else
+      run "echo 'export DS_MODE_DEFAULT=\"$export_value\"' >> \"$rc\""
+      echo "  ✓ added DS_MODE_DEFAULT=$export_value to $rc"
     fi
   done
 fi
@@ -141,9 +158,11 @@ Next steps:
   - Restart Claude Code (or open a new session) — the SessionStart hook
     will inject the DS Mode ruleset, and DS Mode will appear in the
     plugin list (\`/plugin list\` or the desktop plugin UI).
-  - DS Mode is automatic. Toggle in any session:
+  - Toggle in any session:
+      /ds-mode lite                   TLDR only, no HTML (unless you ask)
+      /ds-mode full                   TLDR + auto HTML when triggers fire
       /ds-mode off                    disable for this session
-      /ds-mode on                     re-enable
+      /ds-mode on                     re-enable at default mode
       /ds-mode <your question>        answer + force visual HTML one-pager
 
 Docs:
