@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "ds-mode",
-      "version": "1.6.0",
+      "version": "1.6.1",
       "description": "DS Mode — plain-English answers with pretty pictures.",
       "source": "./",
       "category": "productivity"

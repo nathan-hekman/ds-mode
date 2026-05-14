@@ -47,6 +47,23 @@ else
   fail "first-run sentinel" "no .ds-mode-installed written"
 fi
 
+# ----- 1b. Legacy "on" flag is auto-migrated to "full" -----
+heading "legacy flag migration"
+# Simulate a pre-1.6.0 install: file exists, contents = "on".
+printf 'on\n' > "$CLAUDE_CONFIG_DIR/.ds-mode-active"
+OUT=$(node hooks/ds-mode-activate.js 2>&1 | head -1)
+if echo "$OUT" | grep -q "DS MODE ACTIVE — mode: full · theme: auto · version:"; then
+  pass "legacy 'on' flag is read as full"
+else
+  fail "legacy flag read" "expected 'full' header, got: '$OUT'"
+fi
+MIGRATED=$(cat "$CLAUDE_CONFIG_DIR/.ds-mode-active" 2>/dev/null | tr -d '\n')
+if [[ "$MIGRATED" == "full" ]]; then
+  pass "legacy 'on' flag was rewritten in-place to 'full'"
+else
+  fail "legacy flag migration" "flag still '$MIGRATED' after activate"
+fi
+
 # ----- 2. Tracker dispatches modes/themes -----
 heading "tracker command dispatch"
 echo '{"prompt":"/ds-mode lite"}' | node hooks/ds-mode-tracker.js >/dev/null 2>&1

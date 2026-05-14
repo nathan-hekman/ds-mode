@@ -30,10 +30,28 @@ function getDefaultMode() {
   return DEFAULT_MODE;
 }
 
+// Pre-1.6.0, the flag file was a presence-only sentinel containing the
+// literal string "on". 1.6.0 introduced the lite|full schema and the
+// strict reader silently treated "on" as invalid → off. Anyone who
+// upgraded across that boundary lost DS Mode without warning. Accept the
+// legacy aliases and rewrite the file in-place so subsequent reads are
+// clean.
+const LEGACY_MODE_ALIASES = {
+  on: 'full',
+  enabled: 'full',
+  true: 'full',
+};
+
 function readMode(flagPath) {
   try {
     const raw = fs.readFileSync(flagPath, 'utf8').trim().toLowerCase();
-    return VALID_MODES.includes(raw) ? raw : null;
+    if (VALID_MODES.includes(raw)) return raw;
+    if (Object.prototype.hasOwnProperty.call(LEGACY_MODE_ALIASES, raw)) {
+      const migrated = LEGACY_MODE_ALIASES[raw];
+      try { safeWrite(flagPath, migrated); } catch (e) { /* keep going */ }
+      return migrated;
+    }
+    return null;
   } catch (e) { return null; }
 }
 
