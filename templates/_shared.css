@@ -1,0 +1,81 @@
+/* DS Mode — shared styles for every one-pager template.
+ * Inlined by templates/build.mjs at stamp time. Do not link as external. */
+
+:root {
+  --ink: #2a2622;
+  --ink-soft: #6b6660;
+  --ink-faint: #a39d95;
+  --bg: #faf6ef;
+  --bg-elevated: #f4eee3;
+  --rule: rgba(42, 38, 34, 0.14);
+  --accent: #b85c2a;
+}
+/* {{THEME_BLOCK}} — stamper either inserts the @media query (auto theme)
+ * or hardcodes dark/light values directly on :root above. */
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-feature-settings: "ss01", "ss02", "kern", "liga";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif;
+  padding: 48px 56px 32px;
+  max-width: 920px;
+  margin: 0 auto;
+}
+.serif {
+  font-family: "New York", ui-serif, "Iowan Old Style", Charter, Georgia, serif;
+  font-optical-sizing: auto;
+  font-feature-settings: "kern", "liga", "onum";
+}
+.eyebrow {
+  font-family: "New York", ui-serif, "Iowan Old Style", Charter, Georgia, serif;
+  font-style: italic; font-weight: 500; font-size: 13px;
+  color: var(--accent); letter-spacing: 0.01em;
+  margin: 0 0 8px;
+}
+h1.title {
+  font-family: "New York", ui-serif, "Iowan Old Style", Charter, Georgia, serif;
+  font-optical-sizing: auto;
+  font-size: 38px; font-weight: 500; letter-spacing: -0.018em; line-height: 1.08;
+  margin: 0 0 12px; color: var(--ink);
+}
+.deck {
+  font-family: "New York", ui-serif, "Iowan Old Style", Charter, Georgia, serif;
+  font-style: italic; font-size: 18px; font-weight: 400; line-height: 1.4;
+  color: var(--ink-soft); margin: 0 0 30px; max-width: 620px;
+}
+.hero { color: var(--ink); display: block; margin: 8px auto 8px; }
+.hero-caption {
+  text-align: center; font-family: "New York", ui-serif, serif; font-style: italic;
+  font-size: 14px; color: var(--ink-soft); margin: 0 0 28px;
+}
+.tile-label {
+  font-family: "New York", ui-serif, "Iowan Old Style", Charter, Georgia, serif;
+  font-weight: 500; font-size: 15px; color: var(--ink); margin: 6px 0 4px;
+}
+.tile-caption {
+  font-size: 12px; line-height: 1.4; color: var(--ink-soft); margin: 0;
+}
+.tile-svg { display: block; margin: 0 auto; color: var(--ink); }
+footer {
+  margin-top: 36px; padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  font-size: 11px; color: var(--ink-faint); letter-spacing: 0.04em;
+}
+footer em { font-family: "New York", ui-serif, serif; font-style: italic; color: var(--ink-soft); }
+.pick {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--accent); letter-spacing: 0.04em; margin-left: 6px;
+}
+.pick::before { content: "✓"; font-size: 12px; }
+code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.88em; background: var(--bg-elevated);
+  padding: 1px 5px; border-radius: 3px; color: var(--ink);
+}

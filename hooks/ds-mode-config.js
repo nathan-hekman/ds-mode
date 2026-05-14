@@ -1,8 +1,11 @@
-// hooks/ds-mode-config.js — shared utilities for DS Mode hooks
+// hooks/ds-mode-config.js — shared utilities for DS Mode hooks.
 //
-// DS Mode supports two active modes (`lite`, `full`) plus an absent flag = off.
-// The flag file at $CLAUDE_CONFIG_DIR/.ds-mode-active stores the active mode
-// name as a single line (`lite\n` or `full\n`). Missing file = off.
+// Three independent settings tracked via flag files in $CLAUDE_CONFIG_DIR:
+//   .ds-mode-active     mode: lite | full   (absent = off)
+//   .ds-mode-theme      theme: auto | light | dark  (absent = auto)
+//   .ds-mode-tone       tone: default | surfer       (absent = default)
+//   .ds-mode-installed  sentinel — written on first SessionStart so a
+//                       user-chosen "off" mode survives subsequent sessions.
 
 const fs = require('fs');
 const path = require('path');
@@ -11,14 +14,18 @@ const os = require('os');
 const VALID_MODES = ['lite', 'full'];
 const DEFAULT_MODE = 'full';
 
-// Resolve $CLAUDE_CONFIG_DIR with homedir fallback.
+const VALID_THEMES = ['auto', 'light', 'dark'];
+const DEFAULT_THEME = 'auto';
+
+const VALID_TONES = ['default', 'surfer'];
+const DEFAULT_TONE = 'default';
+
 function claudeConfigDir() {
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 }
 
-// Read configured default mode. `DS_MODE_DEFAULT=off` keeps sessions disabled
-// on first run; any other valid mode name (lite|full) becomes the default;
-// anything else (or unset) falls back to `full`.
+// ---- mode (lite | full | off) ----
+
 function getDefaultMode() {
   const env = (process.env.DS_MODE_DEFAULT || '').trim().toLowerCase();
   if (env === 'off') return 'off';
@@ -26,34 +33,67 @@ function getDefaultMode() {
   return DEFAULT_MODE;
 }
 
-// Symlink-safe flag write: refuses to follow a pre-existing symlink at the
-// target path (defense against a malicious symlink clobbering a real file).
-function safeWriteFlag(flagPath, mode) {
-  if (!VALID_MODES.includes(mode)) {
-    return false;
-  }
-  try {
-    const stat = fs.lstatSync(flagPath);
-    if (stat.isSymbolicLink()) {
-      return false;
-    }
-  } catch (e) {
-    // File does not exist yet — fine.
-  }
-  const tempPath = `${flagPath}.${process.pid}.${Date.now()}`;
-  fs.writeFileSync(tempPath, mode + '\n', { mode: 0o600 });
-  fs.renameSync(tempPath, flagPath);
-  return true;
-}
-
-// Read the current mode. Returns null if flag missing or content invalid.
 function readMode(flagPath) {
   try {
     const raw = fs.readFileSync(flagPath, 'utf8').trim().toLowerCase();
     return VALID_MODES.includes(raw) ? raw : null;
-  } catch (e) {
-    return null;
-  }
+  } catch (e) { return null; }
+}
+
+function safeWriteMode(flagPath, mode) {
+  if (!VALID_MODES.includes(mode)) return false;
+  return safeWrite(flagPath, mode);
+}
+
+// ---- theme (auto | light | dark) ----
+
+function getDefaultTheme() {
+  const env = (process.env.DS_MODE_THEME || '').trim().toLowerCase();
+  return VALID_THEMES.includes(env) ? env : DEFAULT_THEME;
+}
+
+function readTheme(flagPath) {
+  try {
+    const raw = fs.readFileSync(flagPath, 'utf8').trim().toLowerCase();
+    return VALID_THEMES.includes(raw) ? raw : null;
+  } catch (e) { return null; }
+}
+
+function safeWriteTheme(flagPath, theme) {
+  if (!VALID_THEMES.includes(theme)) return false;
+  return safeWrite(flagPath, theme);
+}
+
+// ---- tone (default | surfer) ----
+
+function getDefaultTone() {
+  const env = (process.env.DS_MODE_TONE || '').trim().toLowerCase();
+  return VALID_TONES.includes(env) ? env : DEFAULT_TONE;
+}
+
+function readTone(flagPath) {
+  try {
+    const raw = fs.readFileSync(flagPath, 'utf8').trim().toLowerCase();
+    return VALID_TONES.includes(raw) ? raw : null;
+  } catch (e) { return null; }
+}
+
+function safeWriteTone(flagPath, tone) {
+  if (!VALID_TONES.includes(tone)) return false;
+  return safeWrite(flagPath, tone);
+}
+
+// ---- generic safe-write + delete ----
+
+function safeWrite(flagPath, content) {
+  try {
+    const stat = fs.lstatSync(flagPath);
+    if (stat.isSymbolicLink()) return false;
+  } catch (e) { /* fine */ }
+  const tempPath = `${flagPath}.${process.pid}.${Date.now()}`;
+  fs.writeFileSync(tempPath, content + '\n', { mode: 0o600 });
+  fs.renameSync(tempPath, flagPath);
+  return true;
 }
 
 function deleteFlag(flagPath) {
@@ -61,11 +101,12 @@ function deleteFlag(flagPath) {
 }
 
 module.exports = {
-  VALID_MODES,
-  DEFAULT_MODE,
+  VALID_MODES, DEFAULT_MODE,
+  VALID_THEMES, DEFAULT_THEME,
+  VALID_TONES, DEFAULT_TONE,
   claudeConfigDir,
-  getDefaultMode,
-  safeWriteFlag,
-  readMode,
+  getDefaultMode, readMode, safeWriteMode,
+  getDefaultTheme, readTheme, safeWriteTheme,
+  getDefaultTone, readTone, safeWriteTone,
   deleteFlag,
 };

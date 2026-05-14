@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<title>{{TITLE}}</title>
+<style>{{SHARED_CSS}}
+  .status-body {
+    text-align: center; max-width: 560px; margin: 12px auto 0;
+  }
+  .status-body p {
+    font-family: "New York", ui-serif, serif; font-size: 17px;
+    line-height: 1.5; color: var(--ink); margin: 0;
+  }
+</style>
+</head>
+<body>
+  <p class="eyebrow">{{EYEBROW}}</p>
+  <h1 class="title">{{TITLE}}</h1>
+  <p class="deck">{{DECK}}</p>
+
+  {{HERO_SVG}}
+  <p class="hero-caption">{{HERO_CAPTION}}</p>
+
+  <div class="status-body">
+    <p>{{BODY}}</p>
+  </div>
+
+  <footer>{{FOOTER}}</footer>
+</body>
+</html>

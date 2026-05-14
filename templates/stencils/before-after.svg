@@ -1,0 +1,15 @@
+<!-- before-after.svg — two boxes side by side with an arrow between.
+     Replace LABEL_BEFORE / LABEL_AFTER with ≤2-word captions.
+     Intended container: 440×220 viewBox. Inherits currentColor. -->
+<svg width="440" height="220" viewBox="0 0 440 220" role="img"
+     aria-label="LABEL_BEFORE becomes LABEL_AFTER." xmlns="http://www.w3.org/2000/svg">
+  <!-- before box -->
+  <rect x="40" y="50" width="150" height="120" rx="10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 3" opacity="0.7"/>
+  <text x="115" y="118" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" fill="currentColor">LABEL_BEFORE</text>
+  <!-- arrow -->
+  <line x1="200" y1="110" x2="240" y2="110" stroke="currentColor" stroke-width="1.6"/>
+  <polyline points="232,104 242,110 232,116" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <!-- after box -->
+  <rect x="250" y="50" width="150" height="120" rx="10" fill="none" stroke="currentColor" stroke-width="1.8"/>
+  <text x="325" y="118" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" font-weight="500" fill="currentColor">LABEL_AFTER</text>
+</svg>

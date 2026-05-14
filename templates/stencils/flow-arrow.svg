@@ -1,0 +1,21 @@
+<!-- flow-arrow.svg — three nodes left-to-right with arrows between.
+     Replace LABEL_A / LABEL_B / LABEL_C with ≤2-word captions.
+     Intended container: 440×220 viewBox. Inherits currentColor. -->
+<svg width="440" height="220" viewBox="0 0 440 220" role="img"
+     aria-label="LABEL_A flows into LABEL_B which flows into LABEL_C." xmlns="http://www.w3.org/2000/svg">
+  <!-- node A -->
+  <rect x="20" y="80" width="100" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="70" y="116" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" fill="currentColor">LABEL_A</text>
+  <!-- arrow A→B -->
+  <line x1="126" y1="110" x2="158" y2="110" stroke="currentColor" stroke-width="1.4"/>
+  <polyline points="150,104 160,110 150,116" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <!-- node B -->
+  <rect x="164" y="72" width="112" height="76" rx="11" fill="none" stroke="currentColor" stroke-width="1.8"/>
+  <text x="220" y="116" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" font-weight="500" fill="currentColor">LABEL_B</text>
+  <!-- arrow B→C -->
+  <line x1="282" y1="110" x2="314" y2="110" stroke="currentColor" stroke-width="1.4"/>
+  <polyline points="306,104 316,110 306,116" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <!-- node C -->
+  <rect x="320" y="80" width="100" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="370" y="116" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" fill="currentColor">LABEL_C</text>
+</svg>

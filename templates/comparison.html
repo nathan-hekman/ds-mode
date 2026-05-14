@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<title>{{TITLE}}</title>
+<style>{{SHARED_CSS}}
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 20px; align-items: start; }
+  .col { text-align: center; }
+  .col svg { display: block; margin: 0 auto 10px; color: var(--ink); }
+  .col .label {
+    font-family: "New York", ui-serif, serif; font-weight: 500; font-size: 18px;
+    margin: 4px 0 6px; color: var(--ink);
+  }
+  .col .caption { font-size: 13px; line-height: 1.45; color: var(--ink-soft); margin: 0 auto; max-width: 320px; }
+</style>
+</head>
+<body>
+  <p class="eyebrow">{{EYEBROW}}</p>
+  <h1 class="title">{{TITLE}}</h1>
+  <p class="deck">{{DECK}}</p>
+
+  <section class="pair">
+    <div class="col">
+      {{LEFT_SVG}}
+      <div class="label">{{LEFT_LABEL}}</div>
+      <p class="caption">{{LEFT_CAPTION}}</p>
+    </div>
+    <div class="col">
+      {{RIGHT_SVG}}
+      <div class="label">{{RIGHT_LABEL}}</div>
+      <p class="caption">{{RIGHT_CAPTION}}</p>
+    </div>
+  </section>
+
+  <footer>{{FOOTER}}</footer>
+</body>
+</html>

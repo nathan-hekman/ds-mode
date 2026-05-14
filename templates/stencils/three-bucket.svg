@@ -1,0 +1,17 @@
+<!-- three-bucket.svg — three labeled containers, middle one emphasized.
+     Replace LABEL_1 / LABEL_2 / LABEL_3 with ≤2-word captions. The middle
+     bucket is the "primary" / "default" — bolder stroke + small "default"
+     mark. Intended container: 460×220 viewBox. Inherits currentColor. -->
+<svg width="460" height="220" viewBox="0 0 460 220" role="img"
+     aria-label="Three options: LABEL_1, LABEL_2 (default), and LABEL_3." xmlns="http://www.w3.org/2000/svg">
+  <!-- bucket 1 -->
+  <rect x="20" y="50" width="130" height="130" rx="11" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="85" y="120" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" fill="currentColor">LABEL_1</text>
+  <!-- bucket 2 (primary) -->
+  <rect x="165" y="36" width="130" height="158" rx="12" fill="none" stroke="currentColor" stroke-width="2.2"/>
+  <text x="230" y="118" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" font-weight="500" fill="currentColor">LABEL_2</text>
+  <text x="230" y="138" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-style="italic" fill="currentColor" opacity="0.6">default</text>
+  <!-- bucket 3 -->
+  <rect x="310" y="50" width="130" height="130" rx="11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.7"/>
+  <text x="375" y="120" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" fill="currentColor" opacity="0.85">LABEL_3</text>
+</svg>

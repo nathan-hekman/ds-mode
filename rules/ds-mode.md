@@ -105,6 +105,44 @@ The HTML build rule depends on the active mode.
 
 **Exception (both modes):** if the user invoked `/ds-mode <prompt>`, the HTML one-pager is **mandatory for this one turn regardless of mode and regardless of length**. This is the explicit "show me visually" override — lite users get a one-shot picture without leaving lite mode.
 
+### Use the stamper, not inline HTML
+
+**Build one-pagers via `templates/build.mjs`, not by writing ~300 lines of inline HTML in the Write tool.** The stamper is faster (5× fewer tokens generated), keeps every page on-system (typography, palette, layout), and handles theme overrides for you.
+
+Workflow:
+
+1. Pick the template kind that fits the answer:
+   - `explainer` — how something works (hero + 1–3 captioned tiles)
+   - `comparison` — A vs B (two equal columns, no hero)
+   - `decision` — a choice was made (recommendation + 2–3 option tiles)
+   - `status` — what changed (single hero + 1 short paragraph)
+2. Build a JSON slot object with `eyebrow`, `title`, `deck`, plus the kind-specific slots (see `templates/build.mjs --help`).
+3. For SVGs, prefer reusing a stencil from `templates/stencils/` (replace the placeholder labels) over drawing from scratch.
+4. Invoke the stamper via Bash:
+   ```
+   node "${CLAUDE_PLUGIN_ROOT}/templates/build.mjs" <kind> --slots '<json>' --screenshot
+   ```
+   - The stamper auto-resolves the active theme from `$CLAUDE_CONFIG_DIR/.ds-mode-theme`. If you need to override explicitly, pass `--theme dark|light|auto`.
+   - `--screenshot` writes a sibling `.png` you can attach inline in chat (helpful on Claude mobile).
+5. Capture the printed HTML path; `open` it via Bash.
+
+The stamper is the canonical path. Hand-written inline HTML is a fallback only when no template kind fits — and that should be rare.
+
+### Density caps (when filling slots)
+
+The one-pager is visual. The picture is the answer; the words are labels.
+
+| Element | Word cap |
+|---|---|
+| Title | ≤ 7 |
+| Deck (one sentence) | ≤ 18 |
+| Eyebrow | ≤ 4 |
+| Hero caption | ≤ 10 |
+| Tile label | ≤ 4 |
+| Tile caption | ≤ 12 |
+
+If the meaning won't fit, the diagram isn't doing its job. Redraw, don't lengthen the words. ELI8.
+
 ### The HTML must be VISUAL, not boxes of text
 
 This is the rule that matters most. The whole point of the one-pager is that a PM can glance at it and grok the answer without reading prose.

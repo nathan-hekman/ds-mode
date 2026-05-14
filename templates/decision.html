@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<title>{{TITLE}}</title>
+<style>{{SHARED_CSS}}
+  .recommendation {
+    text-align: center; margin: 0 0 28px;
+  }
+  .recommendation .label {
+    font-family: "New York", ui-serif, serif; font-style: italic;
+    font-size: 14px; color: var(--accent); letter-spacing: 0.01em;
+    margin: 0 0 6px;
+  }
+  .recommendation .answer {
+    font-family: "New York", ui-serif, serif; font-weight: 500;
+    font-size: 26px; line-height: 1.2; letter-spacing: -0.012em;
+    color: var(--ink); margin: 0;
+  }
+  .options { display: grid; grid-template-columns: repeat({{OPTION_COUNT}}, 1fr); gap: 22px; margin-top: 12px; }
+  .option {
+    text-align: center; padding: 18px 14px 16px;
+    border-radius: 12px; background: var(--bg-elevated);
+    position: relative;
+  }
+  .option.shipped {
+    background: transparent; outline: 1.5px solid var(--accent); outline-offset: -1.5px;
+  }
+  .option .chip {
+    position: absolute; top: -10px; right: 12px;
+    background: var(--bg); color: var(--accent);
+    font-size: 10px; letter-spacing: 0.06em;
+    padding: 2px 8px; border: 1px solid var(--accent); border-radius: 10px;
+  }
+  .option svg { display: block; margin: 0 auto 10px; color: var(--ink); }
+  .option .opt-label {
+    font-family: "New York", ui-serif, serif; font-weight: 500;
+    font-size: 14px; margin: 0 0 4px; color: var(--ink);
+  }
+  .option .opt-note {
+    font-size: 11px; line-height: 1.4; color: var(--ink-soft); margin: 0;
+  }
+</style>
+</head>
+<body>
+  <p class="eyebrow">{{EYEBROW}}</p>
+  <h1 class="title">{{TITLE}}</h1>
+  <p class="deck">{{DECK}}</p>
+
+  <div class="recommendation">
+    <div class="label">{{REC_LABEL}}</div>
+    <p class="answer">{{REC_ANSWER}}</p>
+  </div>
+
+  <section class="options">
+    {{OPTIONS}}
+  </section>
+
+  <footer>{{FOOTER}}</footer>
+</body>
+</html>

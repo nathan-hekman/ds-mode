@@ -61,6 +61,18 @@ Built for product managers, founders, and **anyone who'd rather skim a picture t
 
 The active mode persists in `$CLAUDE_CONFIG_DIR/.ds-mode-active`. Switch with `/ds-mode lite` or `/ds-mode full`.
 
+## Theme
+
+The visual one-pager adapts to your OS dark-mode preference by default. You can pin it explicitly:
+
+```
+/ds-mode dark      # force dark palette on every one-pager
+/ds-mode light     # force light palette
+/ds-mode auto      # follow OS preference (default)
+```
+
+Theme persists in `$CLAUDE_CONFIG_DIR/.ds-mode-theme`.
+
 ## Install
 
 **Pure Claude Code commands (recommended):**

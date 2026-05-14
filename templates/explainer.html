@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<title>{{TITLE}}</title>
+<style>{{SHARED_CSS}}</style>
+</head>
+<body>
+  <p class="eyebrow">{{EYEBROW}}</p>
+  <h1 class="title">{{TITLE}}</h1>
+  <p class="deck">{{DECK}}</p>
+
+  {{HERO_SVG}}
+  <p class="hero-caption">{{HERO_CAPTION}}</p>
+
+  <section style="display:grid;grid-template-columns:repeat({{TILE_COUNT}},1fr);gap:32px;margin-top:8px;">
+    {{TILES}}
+  </section>
+
+  <footer>{{FOOTER}}</footer>
+</body>
+</html>

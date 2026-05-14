@@ -1,6 +1,6 @@
 ---
 name: ds-mode-help
-description: Quick-reference card for DS Mode — modes, commands, where files go. One-shot display, not a persistent mode. Trigger when user asks "/ds-mode-help", "what does ds-mode do", "how do I use ds mode", or "ds mode help".
+description: Quick-reference card for DS Mode — modes, theme, commands, where files go. One-shot display, not a persistent mode. Trigger when user asks "/ds-mode-help", "what does ds-mode do", "how do I use ds mode", or "ds mode help".
 ---
 
 # DS Mode Help
@@ -12,7 +12,7 @@ Display this reference card when invoked. One-shot — do NOT change any state, 
 A Claude Code plugin that adds two things to non-trivial replies:
 
 1. A plain-English **TLDR block** at the bottom of the message — 3 bullets max, 12 words each, ELI8.
-2. A **visual HTML one-pager** opened in your browser when the reply is a decent length. Illustration-first — hero SVG + captioned tiles, not boxes of text.
+2. A **visual HTML one-pager** opened in your browser when the reply is a decent length. Illustration-first — hero SVG + captioned tiles, not boxes of text. Adapts to your OS dark-mode preference automatically (or pin it via `/ds-mode dark` / `/ds-mode light`).
 
 DS Mode is **active by default** once installed (mode = `full`).
 
@@ -37,10 +37,22 @@ The `⚑ Questions for you` block only appears when there's a real blocker.
 | Mode | Behavior |
 |------|----------|
 | **lite** | TLDR only. No HTML one-pager unless you explicitly invoke `/ds-mode <prompt>`. Best for terminal-heavy workflows. |
-| **full** | TLDR + auto HTML one-pager when the reply is a decent length (≥ ~300 words, multi-part concept, 2+ headings, code + narrative, A/B decision). **Default.** |
+| **full** | TLDR + auto HTML one-pager when the reply is a decent length. **Default.** |
 | **off** | Disabled this session. Hooks emit nothing. |
 
 The active mode is set per-session via `/ds-mode lite|full` and persists in `$CLAUDE_CONFIG_DIR/.ds-mode-active`.
+
+## Theme
+
+The HTML one-pager adapts to your OS dark-mode preference by default. You can pin it explicitly:
+
+| Command | Behavior |
+|---------|----------|
+| `/ds-mode dark` | Force dark palette on every one-pager. |
+| `/ds-mode light` | Force light palette on every one-pager. |
+| `/ds-mode auto` | Follow OS preference (default). |
+
+Theme persists in `$CLAUDE_CONFIG_DIR/.ds-mode-theme`.
 
 ## Commands
 
@@ -51,6 +63,7 @@ The active mode is set per-session via `/ds-mode lite|full` and persists in `$CL
 | `/ds-mode full` | Switch to full mode (TLDR + auto HTML). |
 | `/ds-mode on` | Re-enable at default mode. |
 | `/ds-mode off` | Disable for this session. |
+| `/ds-mode dark` / `/ds-mode light` / `/ds-mode auto` | Pin or auto-follow the OS theme for the HTML one-pager. |
 | `/ds-mode <your question>` | Answer the question AND force the visual HTML one-pager for this turn — works in both lite and full mode. |
 | `/ds-mode-help` | This card. |
 
@@ -61,22 +74,26 @@ The active mode is set per-session via `/ds-mode lite|full` and persists in `$CL
 
 ## Configure default
 
-DS Mode starts in `full` mode by default. To change the default for new sessions, set an env var:
+DS Mode starts in `full` mode by default. To change the defaults for new sessions, set env vars:
 
 ```bash
-export DS_MODE_DEFAULT=lite     # start in lite mode
-export DS_MODE_DEFAULT=off      # start disabled
+export DS_MODE_DEFAULT=lite    # start in lite mode
+export DS_MODE_DEFAULT=off     # start disabled
+export DS_MODE_THEME=dark      # default theme to dark
+export DS_MODE_THEME=light     # default theme to light
 ```
 
-Add to your shell's rc file (`~/.zshrc`, `~/.bashrc`, etc.) to make it stick. The installer can write this for you with `./install.sh --default-mode lite` or `./install.sh --default-off`.
+Add to your shell rc to make it stick. The installer can write these for you with `./install.sh --default-mode lite`, `./install.sh --default-off`, etc.
 
 ## Where files go
 
 | Path | Purpose |
 |------|---------|
-| `$CLAUDE_CONFIG_DIR/.ds-mode-active` | Flag file — contains active mode (`lite` or `full`). |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-active` | Flag — active mode (`lite` or `full`). |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-theme` | Theme override (`auto`, `light`, `dark`). |
 | `$CLAUDE_CONFIG_DIR/.ds-mode-installed` | Sentinel — written on first run so a user-chosen disable state survives sessions. |
 | `$TMPDIR/dsmode-summary-<timestamp>.html` | Auto-generated one-pagers (ephemeral). |
+| `$TMPDIR/dsmode-summary-<timestamp>.png` | Sibling screenshot when the stamper was called with `--screenshot`. |
 
 DS Mode never writes into your project tree.
 
@@ -85,8 +102,10 @@ DS Mode never writes into your project tree.
 ```bash
 claude plugin uninstall ds-mode@ds-mode
 claude plugin marketplace remove ds-mode
-rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active" "$CLAUDE_CONFIG_DIR/.ds-mode-installed"
-# Remove the DS_MODE_DEFAULT export from your shell rc if you don't want it.
+rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active" \
+      "$CLAUDE_CONFIG_DIR/.ds-mode-theme" \
+      "$CLAUDE_CONFIG_DIR/.ds-mode-tone" \
+      "$CLAUDE_CONFIG_DIR/.ds-mode-installed"
 ```
 
 ## More
