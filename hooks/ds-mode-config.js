@@ -100,6 +100,46 @@ function deleteFlag(flagPath) {
   try { fs.unlinkSync(flagPath); } catch (e) {}
 }
 
+// ---- mobile mode (private GitHub publish) ----
+
+// Mobile mode is opt-in. Config persists as JSON at
+// $CLAUDE_CONFIG_DIR/.ds-mode-mobile so the setup wizard's choices
+// (repo path, clone dir) carry across sessions.
+//
+//   { "enabled": true, "repo": "user/ds-mode-mobile",
+//     "clone_path": "/Users/.../.claude/ds-mode-mobile",
+//     "owner": "user" }
+//
+// `enabled: false` keeps the config (so disabling and re-enabling
+// reuses the same repo).
+
+function readMobileConfig(flagPath) {
+  try {
+    const raw = fs.readFileSync(flagPath, 'utf8');
+    const data = JSON.parse(raw);
+    if (typeof data !== 'object' || data === null) return null;
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeMobileConfig(flagPath, config) {
+  try {
+    const stat = fs.lstatSync(flagPath);
+    if (stat.isSymbolicLink()) return false;
+  } catch (e) { /* fine */ }
+  const tmp = `${flagPath}.${process.pid}.${Date.now()}`;
+  fs.writeFileSync(tmp, JSON.stringify(config, null, 2) + '\n', { mode: 0o600 });
+  fs.renameSync(tmp, flagPath);
+  return true;
+}
+
+function mobileIsEnabled(flagPath) {
+  const cfg = readMobileConfig(flagPath);
+  return !!(cfg && cfg.enabled && cfg.repo && cfg.clone_path);
+}
+
 module.exports = {
   VALID_MODES, DEFAULT_MODE,
   VALID_THEMES, DEFAULT_THEME,
@@ -108,5 +148,6 @@ module.exports = {
   getDefaultMode, readMode, safeWriteMode,
   getDefaultTheme, readTheme, safeWriteTheme,
   getDefaultTone, readTone, safeWriteTone,
+  readMobileConfig, writeMobileConfig, mobileIsEnabled,
   deleteFlag,
 };

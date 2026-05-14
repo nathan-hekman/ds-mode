@@ -27,9 +27,9 @@
 //   node templates/build.mjs --help
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
+import { spawnSync, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve as pathResolve } from 'node:path';
+import { dirname, join, basename, resolve as pathResolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -119,8 +119,17 @@ console.log(outHtml);
 
 if (flags.screenshot) {
   const ok = takeScreenshot(outHtml, outPng);
-  if (ok) console.log(outPng);
-  else console.error('warn: screenshot failed; HTML written but no PNG.');
+  if (ok) {
+    console.log(outPng);
+    // If mobile mode is enabled, fire the publish script in the background.
+    // The stamper exits immediately; the child takes ~1-3s to git push.
+    // The future URL is deterministic (based on the PNG filename), so we
+    // emit it now even before the push completes.
+    const mobileUrl = mobilePublishIfEnabled(outPng);
+    if (mobileUrl) console.log(mobileUrl);
+  } else {
+    console.error('warn: screenshot failed; HTML written but no PNG.');
+  }
 }
 
 // ------------------------------------------------------------------
@@ -220,6 +229,32 @@ function resolveActiveTheme() {
     if (['auto', 'light', 'dark'].includes(flag)) return flag;
   } catch (e) {}
   return null;
+}
+
+// If mobile mode is enabled in $CLAUDE_CONFIG_DIR/.ds-mode-mobile, spawn the
+// publish helper as a detached child so the git push happens in the background
+// (~1–3s). The future URL is deterministic from the PNG filename, so we return
+// it immediately. Returns null when mobile mode is off or misconfigured.
+function mobilePublishIfEnabled(pngPath) {
+  let cfg;
+  try {
+    const claudeDir = process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME || '', '.claude');
+    const cfgPath = join(claudeDir, '.ds-mode-mobile');
+    cfg = JSON.parse(readFileSync(cfgPath, 'utf8'));
+  } catch (e) { return null; }
+  if (!cfg || !cfg.enabled || !cfg.repo) return null;
+  const file = basename(pngPath);
+  const url = `https://github.com/${cfg.repo}/blob/main/${file}`;
+  // Fire-and-forget the publish.
+  try {
+    const child = spawn(
+      join(__dirname, '..', 'hooks', 'ds-mode-mobile-publish.sh'),
+      [pngPath],
+      { detached: true, stdio: 'ignore', env: process.env }
+    );
+    child.unref();
+  } catch (e) { /* silent — URL will 404 until next attempt */ }
+  return url;
 }
 
 function takeScreenshot(htmlPath, pngPath) {
