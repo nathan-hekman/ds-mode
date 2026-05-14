@@ -223,6 +223,16 @@ For decision/blocker triggers, replace the bottom row with option tiles (A / B /
 - **Open command (macOS):** `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` — run via the Bash tool and verify exit code 0.
 - **Mention in the reply:** one sentence above the TLDR — "Opened a one-page visual summary in your browser."
 
+### URL formatting in the reply (mobile-safe)
+
+When sharing any URL in the chat reply — the local `open` mention, the mobile-mode GitHub URL, anything tappable — render it as a **bare URL on its own line**, with no wrapping characters:
+
+```
+https://github.com/<user>/ds-mode-mobile/blob/main/<file>.png
+```
+
+**Never** wrap a URL in `**...**`, `_..._`, backticks, square brackets, or angle brackets. The Claude mobile app's link parser includes the wrapping characters in the link text, which breaks the tap. Markdown link syntax `[text](url)` is fine; `**url**` is not. Bare URL is safest.
+
 ## Caveman mode interaction
 
 Caveman mode and DS Mode are **complementary**, not conflicting.
