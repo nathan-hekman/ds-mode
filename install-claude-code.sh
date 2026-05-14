@@ -23,4 +23,4 @@ git clone --depth 1 --branch "$BRANCH" "https://github.com/$REPO.git" "$TMP_DIR/
 "$TMP_DIR/repo/install.sh" --force "$@"
 
 echo
-echo "Done. Restart Claude Code or run /dsm in any session."
+echo "Done. Restart Claude Code — DS Mode is active automatically. /ds-mode off to disable."

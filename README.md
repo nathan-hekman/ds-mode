@@ -13,7 +13,7 @@
 
 <p align="center">
   Big-brain reply on top. Plain-English nudge at the bottom.<br>
-  Pictures when things get long.
+  A visual one-pager when things get long.
 </p>
 
 <p align="center">
@@ -38,15 +38,12 @@
 
 ---
 
-DS Mode is a system-prompt overlay for AI coding agents. It does two things:
+DS Mode is a system-prompt overlay for AI coding agents. Install it and it just works — no modes to memorize, no flags to fiddle with. It does two things:
 
-1. **Adds a plain-English TL;DR to the bottom** of every long or technical reply.
-   Three bullets, twelve words each, no jargon.
-2. **Auto-generates a one-page HTML visual** in your browser when the answer
-   runs long or covers many parts.
+1. **Adds a plain-English TL;DR to the bottom** of every long or technical reply. Three bullets, twelve words each, no jargon.
+2. **Auto-generates a one-page visual HTML** in your browser when the answer is a decent length. Illustration-first — hero diagram + captioned tiles, not boxes of text.
 
-Built for product managers, founders, and **anyone who'd rather skim a TL;DR
-than parse a wall of jargon**.
+Built for product managers, founders, and **anyone who'd rather skim a picture than parse a wall of jargon**.
 
 > *For people who skim. Built by one of them.*
 
@@ -61,82 +58,60 @@ claude plugin install ds-mode@ds-mode
 
 DS Mode now appears in `claude plugin list` and in Claude Code's desktop plugin UI. Restart Claude Code to activate.
 
-**One-line install with extras** (sets `DS_MODE_DEFAULT` in your shell rc, strips the legacy `outputStyle` setting, writes the mode flag):
+**One-line install with extras** (sets `DS_MODE_DEFAULT=on` in your shell rc, strips the legacy `outputStyle` setting):
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/nathan-hekman/ds-mode/main/install-claude-code.sh)
 ```
 
-DS Mode is on by default in every new session. Toggle per-session with `/dsm`.
+DS Mode is on by default in every new session. Toggle per-session with `/ds-mode off` and `/ds-mode on`.
 
 See [INSTALL.md](./INSTALL.md) for advanced flags, local-clone install, and uninstall.
-
-| Flag | What |
-|---|---|
-| `--minimal` | Plugin install only — skip statusline + shell rc edits. |
-| `--default-mode <mode>` | Set the install-time default to `lite`, `full`, or `visual`. Defaults to `full`. |
-| `--force` | Overwrite a prior install. |
-| `--dry-run` | Print planned actions; write nothing. |
 
 ## What You Get
 
 | Feature | Claude Code | Cursor / Windsurf | Copilot | Codex |
 |---|:-:|:-:|:-:|:-:|
 | Plain-English TLDR at bottom of replies | Y | Y* | Y* | Y* |
-| HTML one-pager when reply is long/dense | Y | — | — | — |
-| Mode switching (`lite` / `full` / `visual` / `off`) | Y | — | — | — |
-| Statusline `DS:<mode>` chip | Y | — | — | — |
-| `/ds-mode-session-summary` (session summary HTML) | Y | — | — | — |
-| `/ds-mode-user-flows` (project user flows HTML+JSON) | Y | — | — | — |
+| Visual HTML one-pager when reply is decent length | Y | Y* | markdown fallback | Y* |
+| `/ds-mode <your question>` — forced visual one-pager | Y | — | — | — |
+| `/ds-mode off` / `/ds-mode on` toggle | Y | — | — | — |
+| Statusline `DS` chip when active | Y | — | — | — |
 | `/ds-mode-help` (quick-reference card) | Y | — | — | — |
-| Auto-activate every session | Y | with adapter | with adapter | with adapter |
 
-\* Cursor/Copilot/Codex get the TLDR rule via the adapter rule files in `adapters/`. HTML one-pager + mode toggle + skills are Claude Code only — they depend on hooks + slash commands.
+\* Cursor/Codex get the full ruleset via the adapter files in `adapters/` and can run the HTML build themselves (they have shell access). Copilot Chat in standard mode renders a markdown summary instead; in Copilot Workspace agent mode it can build real HTML.
 
 ## Usage
 
-Trigger with:
-- `/dsm` or `/ds-mode` — activate at default mode
-- `/dsm lite|full|visual` — pick a mode
-- `/dsm off` — disable for this session
-- Natural language: "ds mode on", "stop ds mode", "talk like ds mode"
+Once installed, DS Mode is automatic on every session. You don't need to do anything — long, technical replies get a plain-English TLDR at the bottom and a visual HTML one-pager pops open in your browser when the answer is long enough.
 
-Skills:
-- `/ds-mode-session-summary` — one-page HTML summary of the current conversation
-- `/ds-mode-user-flows` — one-page HTML + JSON map of the project's main user flows
-- `/ds-mode-help` — quick-reference card for all DS Mode modes, skills, and commands
+When you want explicit control:
 
-## Modes
+- `/ds-mode off` — disable for this session (TLDR + HTML pause).
+- `/ds-mode on` — re-enable for this session.
+- `/ds-mode Explain how the architecture works` — answer this question under DS Mode rules **and force the visual HTML one-pager**, even if the answer is short. This is the "show me visually" lever.
+- `/ds-mode-help` — show the quick-reference card.
 
-| Mode | Behavior |
-|---|---|
-| `lite` | TLDR block at bottom of non-trivial replies. No HTML. Use when you want plain-English recaps without browser pop-ups. |
-| `full` | **Default.** TLDR + HTML one-pager when the prime directive fires (length, density, decision, blocker triggers). |
-| `visual` | TLDR + HTML one-pager on every non-trivial reply (>3 sentences). Use when you want consistent visual deliverables. |
-| `off` | Disabled for this session. Flag removed; hooks emit nothing. |
+You can also use natural language: "stop ds mode", "ds mode on", etc.
 
 ## How It Works
 
 DS Mode is a Claude Code plugin (`.claude-plugin/plugin.json`). It registers two hooks:
 
-1. **SessionStart** (`hooks/ds-mode-activate.js`) — reads the current mode from `$CLAUDE_CONFIG_DIR/.ds-mode-active`, filters `rules/ds-mode.md` to the active mode, and injects the ruleset as session context. (Kept out of `skills/` on purpose so Claude Code doesn't auto-register the ruleset file as a user-invocable skill, which would clash with the `/ds-mode` toggle command.)
-2. **UserPromptSubmit** (`hooks/ds-mode-tracker.js`) — parses `/dsm` commands, updates the flag, and re-anchors a short prime-directive reminder every turn so the rules survive context compression.
+1. **SessionStart** (`hooks/ds-mode-activate.js`) — activates DS Mode by default and injects `rules/ds-mode.md` as session context. (The ruleset lives in `rules/` instead of `skills/` on purpose so Claude Code doesn't register it as a user-invocable skill — that would clash with the `/ds-mode` command.)
+2. **UserPromptSubmit** (`hooks/ds-mode-tracker.js`) — parses `/ds-mode` commands, handles on/off toggling, and re-anchors a short reminder every turn so the rules survive context compression. When you invoke `/ds-mode <prompt>`, this hook flags the turn as HTML-mandatory.
 
-State is persistent across sessions in `$CLAUDE_CONFIG_DIR/.ds-mode-active`. HTML outputs are ephemeral in `$TMPDIR`.
+State is a single flag file at `$CLAUDE_CONFIG_DIR/.ds-mode-active` — present = active, absent = off. HTML outputs are ephemeral in `$TMPDIR`.
 
 ## Other Tools
 
-The `adapters/` directory holds rule-file generators for Cursor, Copilot, and Codex. These get you the TLDR rule but not the HTML one-pager — they don't have a hook system. See `adapters/<tool>/README.md`.
+The `adapters/` directory holds rule-file generators for Cursor, Copilot, and Codex. Cursor and Codex get the full experience including HTML one-pagers (they have shell access). Copilot Chat in standard mode falls back to a markdown summary block. See `adapters/<tool>/README.md`.
 
 ## Why DS Mode
 
-Default AI coding-agent responses are great for engineers. They're rough on
-everyone else. Dense walls of jargon. Equations mid-sentence. Ten-bullet recaps
-that are themselves a wall.
+Default AI coding-agent responses are great for engineers. They're rough on everyone else. Dense walls of jargon. Equations mid-sentence. Ten-bullet recaps that are themselves a wall.
 
-DS Mode keeps the depth where it belongs (top of the answer) and adds a short,
-plain-English recap at the bottom — plus a one-page visual when the answer earns
-one. You can read the technical version, the recap, the picture, or all three.
+DS Mode keeps the depth where it belongs (top of the answer) and adds a short, plain-English recap at the bottom — plus a one-page visual when the answer earns one. You can read the technical version, the recap, the picture, or all three.
 
 ## License
 
@@ -153,5 +128,4 @@ PRs welcome. Especially:
 - Translations of the plain-English style for other languages
 - Cross-platform fixes for the `open` behavior (Linux, Windows)
 
-Open an issue at [nathan-hekman/ds-mode/issues](https://github.com/nathan-hekman/ds-mode/issues)
-to request a port or report a bug.
+Open an issue at [nathan-hekman/ds-mode/issues](https://github.com/nathan-hekman/ds-mode/issues) to request a port or report a bug.

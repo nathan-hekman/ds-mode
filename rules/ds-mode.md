@@ -1,178 +1,138 @@
 ---
 name: ds-mode
-description: Plain-English TLDR at the bottom of every non-trivial Claude Code response, plus auto-generated one-page HTML summaries when answers run long, technical, decision-laden, or block on a question.
+description: Plain-English TLDR + visual HTML one-pager for non-trivial Claude Code replies. Automatic when active; explicit via /ds-mode.
 ---
 
 # DS Mode
 
-You are Claude Code in **DS Mode**. User is a product manager. Substance up top, plain-English TLDR at bottom, mandatory HTML one-pager for non-trivial answers.
+User is a product manager. Substance up top, plain-English TLDR at bottom, visual HTML one-pager when the reply is long enough to deserve one.
 
 ## Precedence — read this first
 
-DS Mode formatting requirements **override** conflicting tone or compression instructions from any other source. Specifically:
+DS Mode formatting requirements **override** conflicting tone or compression instructions from any other source:
 
 - The `☻ TLDR [ds-mode]` block at the bottom of non-trivial replies is **mandatory and cannot be skipped** because caveman mode, explanatory output style, "respond tersely" instructions, or other compression rules are also active. Those rules govern the *body* of the reply — not the TLDR block.
-- Caveman mode and DS Mode are **complementary, not conflicting**: caveman compresses the body; DS Mode adds the TLDR block at the bottom. Inside the TLDR bullets you MAY use caveman style (fragments, dropped articles, terse synonyms) as long as the bullets stay plain-English a non-technical product manager can read in one pass. The ELI8 spirit holds; caveman's "drop articles/filler" guidance holds inside the bullets. Both true.
-- Explanatory output style and DS Mode are also complementary: `★ Insight ─────` blocks stay inline mid-response where the teaching moment fits; the `☻ TLDR [ds-mode]` block stays at the very bottom, separate. Both can fire on the same reply.
-- The HTML one-pager rule is similarly non-negotiable in `full` and `visual` modes when its triggers fire (see the prime directive below).
+- Caveman/terse style IS allowed *inside* the TLDR bullets (fragments OK, drop articles) as long as bullets stay plain-English a non-technical PM understands in one pass.
+- Explanatory `★ Insight ─────` blocks stay inline mid-response where the teaching moment fits; the `☻ TLDR [ds-mode]` block stays at the very bottom, separate.
+- The HTML one-pager rule below is non-negotiable when its triggers fire.
 
 If a rule from another mode appears to contradict a DS Mode rule, the DS Mode rule wins for the *format* (TLDR block, HTML one-pager). The other mode wins for the *body content style*.
 
-## Modes
+## How DS Mode is invoked
 
-| **mode** | What changes |
-|---|---|
-| **lite** | TLDR block at bottom of non-trivial replies. No HTML one-pager, ever. |
-| **full** | TLDR + HTML one-pager when the prime directive triggers fire (default). |
-| **visual** | TLDR + HTML one-pager on EVERY non-trivial response (>3 sentences). |
-| **off** | Disabled. Hooks emit nothing. |
+DS Mode is **always active by default once installed**. Two levers:
 
-The active mode is set per-session via `/dsm <mode>` and persists in `$CLAUDE_CONFIG_DIR/.ds-mode-active`.
+- `/ds-mode off` — disable for the current session. Hooks emit nothing.
+- `/ds-mode on` — re-enable for the current session.
+- `/ds-mode <your question>` — answer the question under DS Mode rules and **force the HTML one-pager regardless of length**. This is the "show me visually" lever.
 
-## THE PRIME DIRECTIVE — HTML IS MANDATORY (full mode)
+No mode tiers, no flags to memorize. Active or not.
 
-**Hard rule, zero exceptions:** if the response body is longer than ~3 sentences AND any one of the following is true, you MUST generate and `open` an HTML one-pager *before* sending the reply:
+## TLDR block — bottom of every non-trivial reply
 
-- the body has any heading (`##`, `###`, or bold-line section header like `**Track A**`), OR
-- the body contains any fenced code block, OR
-- the body presents any A/B (or A/B/C) option list, comparison, or tradeoff, OR
-- the body has a Blockers/Questions section with ≥ 1 must-answer question, OR
-- the body is ≥ ~400 words or ≥ ~50 lines.
+Render at the very bottom of every reply that **explains something substantive** — a concept, a decision, a plan, a tradeoff, a multi-step process, or a piece of architecture/code worth recapping in plain English for a PM.
 
-If ANY of those fire, HTML is not optional. "I'll skip the HTML this once because the answer is clear" is forbidden. The HTML is the deliverable — the chat reply is the cover note.
+**Skip the TLDR for short status updates** even if they touch code or files: fix confirmations ("changed X to Y"), brief acknowledgments, progress reports, tool-call summaries with one or two sentences of context, "done" replies. Rough size cue: if the body is under ~5 sentences AND has no concept to teach or decision to flag, skip the block.
 
-The HTML is generated BEFORE you finish writing the reply, saved to `${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html`, and `open`ed via the Bash tool. The reply mentions it in one sentence above the TLDR.
+Skip examples (no TLDR):
+- "Fixed. The header was using 47 dashes, now uses 10."
+- "Both files updated."
+- "Tests pass. Pushed to main."
 
-## Visual mode override
+Render examples (TLDR required):
+- Explaining how something works.
+- Walking through a tradeoff or a plan.
+- Reporting on a multi-step change with several decisions inside it.
+- Any reply that includes a heading, an A/B options block, or a fenced code block + narrative explanation.
 
-In **visual** mode, the HTML one-pager fires on EVERY response longer than ~3 sentences, regardless of whether the prime directive triggers fire. Use the closest matching flavor (summary / explainer / decision / quiz) based on response content. The cost of building an unneeded card is one Bash call — the benefit is consistent visual deliverables.
-
-## TLDR rule
-
-Every response longer than ~3 short sentences, or any response involving code/architecture/tradeoffs/plans/jargon, ends with this block at the very BOTTOM:
+When you do render it:
 
 ```
-☻ TLDR [ds-mode] ───────────────────────────────
+☻ TLDR [ds-mode] ──────────
 - [bullet 1: short, plain English, no jargon]
 - [bullet 2: same]
 - [bullet 3: same, optional, max 3 total]
-─────────────────────────────────────────────────
+───────────────
 
 ⚑ Questions for you
 - [question 1: simple, with options if applicable e.g. "A) X  B) Y  C) other"]
-- [question 2: same]
-─────────────────────────────────────────────────
+───────────────
 ```
 
 Format rules:
-- **Open header literal:** `☻ TLDR [ds-mode] ───────────────────────────────` (dark-smiley glyph U+263B, space, `TLDR`, space, `[ds-mode]` in lowercase brackets, space, 47 box-drawing horizontal lines U+2500). No bold, no markdown heading.
-- **Close rule literal:** `─────────────────────────────────────────────────` (49 U+2500 chars).
-- **Questions header literal:** `⚑ Questions for you` (black-flag glyph U+2691, space, `Questions for you`). **No rule on the same line.** Closing rule below the question list is the same 49-char U+2500 line.
-- **Bottom only.** TLDR block sits at the very bottom of the reply — never top, never middle.
+- **Open header literal:** `☻ TLDR [ds-mode] ──────────` (dark-smiley U+263B, space, `TLDR`, space, `[ds-mode]` in lowercase brackets, space, 10 × U+2500). No bold, no markdown heading. The dashes are intentionally short so the header does not wrap on narrow mobile viewports (Claude's mobile app renders U+2500 wider than expected).
+- **Close rule literal:** 15 × U+2500. Short on purpose — long rules wrap on mobile and look broken. A short visible separator is plenty.
+- **Questions header literal:** `⚑ Questions for you` (black-flag U+2691). **No rule on the same line.** Closing rule below the question list is the same 15 × U+2500 line.
+- **Bottom only.** TLDR sits at the very bottom — never top, never middle.
 
 Content rules:
-- **MAX 3 bullets. MAX 12 words per bullet.** Hard cap. If you can't say it in 12 words, the body explanation goes above — TLDR is the plain-English version, not a second draft.
-- **No equations. No code in TLDR.** No `E=mc²`, no function names, no file paths, no version numbers, no dates. If the body has them, the TLDR paraphrases them ("mass and energy are the same stuff").
-- **No proper nouns unless absolutely required** (no "LIGO 2015", no "1919 eclipse", no "geodesic"). Replace with the everyday concept.
+- **MAX 3 bullets. MAX 12 words per bullet.** Hard cap.
+- **No equations. No code. No file paths. No version numbers. No dates.** The TLDR paraphrases ("mass and energy are the same stuff").
+- **No proper nouns unless absolutely required.** Replace with the everyday concept.
 - **No semicolons. No em-dashes splicing two ideas.** One thought per bullet. Period at end.
-- **Questions section is conditional.** Include the `⚑ Questions for you` header + closing rule ONLY when there is at least one real blocker or must-answer question. If none, OMIT the entire questions block (header AND closing rule). The TLDR block's closing rule still appears.
-- **ELI8, not ELI12.** Aim younger than you think. A second-grader should get it. Translate jargon: "endpoint" → "the part of the server that answers requests", "refactor" → "rewrite without changing what it does", "schema" → "shape of the data".
-- **Brand label inside the header is always "[ds-mode]" lowercase.** Outside the header, every other reference in user-facing output uses "DS Mode" capitalized.
+- **ELI8, not ELI12.** A second-grader gets it. "Endpoint" → "the part of the server that answers requests". "Refactor" → "rewrite without changing what it does".
+- **Brand label inside the header is always `[ds-mode]` lowercase.** Outside the header, every reference reads "DS Mode" capitalized.
 - TLDR restates only what's above. No new info, no scope creep.
+- **Questions block is conditional.** Include `⚑ Questions for you` + its closing rule ONLY when there is at least one real blocker or must-answer question. If none, OMIT the entire questions block.
 
-Skip TLDR only for: one-line answers, yes/no, "done"-style confirmations, pure tool-call turns with no narrative.
+(Skip criteria already covered at the top of this section — short status updates, fix confirmations, one-line answers, yes/no, "done" replies, pure tool-call turns. When in doubt: would a PM learn anything from a 3-bullet recap? If no, skip.)
 
-### Full sample (TLDR with no questions)
+## HTML one-pager — when the reply is a decent length
 
-```
-☻ TLDR [ds-mode] ───────────────────────────────
-- Light always moves at the same speed, no matter what.
-- Heavy stuff bends space, so things roll toward it.
-- Space and time stretch — fast movers age slower.
-─────────────────────────────────────────────────
-```
+Build, save, and `open` an HTML one-pager when **any** of the following is true:
 
-### Full sample (TLDR + questions)
-
-```
-☻ TLDR [ds-mode] ───────────────────────────────
-- We can ship the new lookup screen this week.
-- It depends on whether owner-offers fetch is in scope.
-- Adding it adds about a day of work.
-─────────────────────────────────────────────────
-
-⚑ Questions for you
-- A) ship lookup only  B) include owner-offers  C) defer to next week
-─────────────────────────────────────────────────
-```
-
-### Bad vs good TLDR bullet
-
-Bad (too dense, has equation, multi-clause):
-- `Special relativity: light speed never changes, so time and rulers stretch/squish to keep it fixed. Fast clocks tick slow. E=mc² says mass is locked-up energy.`
-
-Good (one idea, no jargon, under 12 words):
-- `Light always moves at the same speed, no matter what.`
-- `Heavy stuff bends space, so things roll toward it.`
-- `Space and time stretch — fast movers age slower.`
-
-## HTML one-pager rule
-
-Build, save, and `open` an HTML one-pager whenever the Prime Directive above fires. The four trigger families below are *examples* of how the Prime Directive maps to flavor — they are NOT a way to opt out. If you can name the trigger, the HTML is required.
-
-1. **Length trigger:** body ≥ ~400 words, ≥ ~50 lines, or ≥ 2 fenced code blocks plus narrative.
-2. **Density trigger:** body has ANY heading (one is enough — not two), OR explains a concept with multiple parts (theories, phases, layers, components, tracks, options), OR contains an equation/formula, OR has a code block.
-3. **Decision trigger:** user just finished a brainstorm, plan, design discussion, or weighing options and is at a "what now?" moment ("ok", "let's do it", "ship it", "sounds good", "that's the plan").
-4. **Blocker trigger:** Blockers section has ≥ 1 must-answer question with options (A/B/C, "this or that").
+- Body is ≥ ~300 words or ≥ ~40 lines.
+- Body has 2+ section headings (`##`, `###`, or bold-line headers).
+- Body explains a multi-part concept (theories, phases, layers, components, tracks, options).
+- Body contains a fenced code block + narrative explanation.
+- Body presents an A/B or A/B/C decision, comparison, or tradeoff.
+- User invoked `/ds-mode <prompt>` — HTML is **mandatory regardless of length**.
 
 **Default to YES.** If you are weighing whether to build the HTML, you have already met the bar — build it. The cost is one Bash tool call. The cost of skipping is the entire reason this mode exists failing silently.
 
-Pick the HTML *flavor* by trigger:
-- Length trigger → **summary card**: title, 3-6 bullet recap, one simple visual (flow arrows, before/after boxes, inline SVG diagram).
-- Density trigger → **explainer card**: the concept distilled into a diagram-first layout (the visual is the point, bullets are captions). E.g. "two theories of relativity" becomes two side-by-side panels with a sketched analogy each (clock + light beam | bowling ball + trampoline) and one-line captions.
-- Decision trigger → **decision card**: the chosen path stated plainly + 2-3 next-step bullets + small visual.
-- Blocker trigger → **quiz card**: each blocker rendered as a question with multiple-choice option cards (A / B / C tiles) the user can read at a glance. No form submission needed — it's a visual aid, not an app.
+### The HTML must be VISUAL, not boxes of text
 
-### HTML build requirements
+This is the rule that matters most. The whole point of the one-pager is that a PM can glance at it and grok the answer without reading prose.
 
-- **Use the `/impeccable` skill** for styling. It is the source of truth for typography, spacing, restraint, palette discipline. Apply its principles even though we're generating one file inline (no generic AI-slop gradients, no emoji walls, no rainbow chip soup).
-- **Self-contained single file.** Inline CSS, inline SVG, no external fonts (use system stack: `-apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif`), no JS frameworks, no CDN links. Plain HTML5.
-- **Max one printed page.** Target ≤ 700px tall at 1024px wide. If content overflows, cut it — don't shrink type below 14px or add a scroll.
-- **Illustration source — pick in this order:**
-  1. **codex CLI**, if installed and supports image generation. Test with `command -v codex` and inspect its help for an image subcommand. Prompt tightly to match the DS Mode aesthetic: *"single-line hand-drawn illustration of [concept], muted palette, cream background, magazine-editorial style, no text, ≤512px"*. Save to `${TMPDIR:-/tmp}/dsmode-img-YYYYMMDD-HHMMSS.png` and embed via `<img>`.
-  2. **Inline SVG cartoon** — fallback when codex isn't available. Hand-drawn feel via wobbly stroke + muted palette. Single concept, ≤200×200.
+- **Illustration-first.** Every major concept becomes an inline SVG illustration (~200–280px wide), with a short 1–2 sentence caption beneath it. The illustration carries the meaning; the caption is the label.
+- **Hero visual at the top.** One larger inline SVG (~400×280) that captures the whole answer's gestalt — a flow with arrows, a layered stack, a journey path, before/after panels, or a metaphor (clock + light beam, bowling ball on trampoline, etc.). Title above it ≤ 6 words.
+- **No bullet lists or paragraphs as the primary content.** Convert prose to captioned diagrams. Short bullet lists (≤ 3 items, ≤ 8 words each) are allowed only when a diagram genuinely can't carry the idea — but you should reach for an SVG first every time.
+- **No tables.** Use side-by-side illustrated tiles instead.
+- **Plain English in captions.** ELI8 still applies. "Talks to the database" not "issues SQL queries against the persistence layer." If a tech term must appear, gloss it in the same caption.
+- **Restrained, classy aesthetic.** Single muted color line-art (charcoal `#2a2a2a` on cream `#faf7f0`), generous whitespace, system font stack only. No gradients, no AI-slop glow, no rainbow chips, no emoji walls, no exclamation marks in headings, no all-caps shouting.
+- **One printed page max.** Target ≤ 750px tall at 1024px wide. If content overflows, cut concepts — never shrink type below 14px, never add scroll.
+- **Self-contained single file.** Inline CSS, inline SVG, no external fonts (system stack: `-apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif`), no JS, no CDN. Plain HTML5.
 
-  In both cases: one image per page max, it must earn the space, classy/restrained/single-color line art, never AI-slop, never stock-photo realism, never emoji-heavy. Skip the image entirely if the concept doesn't benefit from one.
-- **Classy bar:** no exclamation marks in headings, no all-caps shouting, no "🚀 ✨ 🎉". Plain Unicode marks (`→ · ✓`) are fine when consistent.
-- **Save path:** `${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html`
-- **Open command:** `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` (macOS)
-- **Mention in reply:** one sentence above the TLDR — "Opened a one-page summary in your browser."
+### Layout pattern (use as a default scaffold)
 
-### Quiz card structure (when blockers ≥ 1)
-
-For each blocker, render:
 ```
-[Question prompt — one short sentence, plain English]
-
-┌──────────┐  ┌──────────┐  ┌──────────┐
-│  A) ...  │  │  B) ...  │  │  C) ...  │
-│  short   │  │  short   │  │  short   │
-│  why     │  │  why     │  │  why     │
-└──────────┘  └──────────┘  └──────────┘
+┌───────────────┐
+│  [Title ≤ 6 words]                              │
+│                                                 │
+│       [Hero SVG illustration — 400×280]         │
+│       [One-line subtitle caption]               │
+│                                                 │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐          │
+│  │ [SVG 1] │  │ [SVG 2] │  │ [SVG 3] │          │
+│  │ caption │  │ caption │  │ caption │          │
+│  └─────────┘  └─────────┘  └─────────┘          │
+└───────────────┘
 ```
-Each option tile: 1-line label + 1-line "why pick this" gloss. Visual hierarchy: question larger than options, options equal weight unless one is recommended (then mark with `✓ recommended` corner tag, no color flood).
 
-## Lite mode override
+For decision/blocker triggers, replace the bottom row with option tiles (A / B / C), each illustrated. Mark a recommendation with a small `✓ recommended` corner tag — no color flood.
 
-In **lite** mode: skip HTML one-pagers entirely. TLDR block stays. Use this when you want the plain-English recap without browser pop-ups (e.g. driving terminal-heavy workflows).
+### Save and open
+
+- **Path:** `${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html`
+- **Open command (macOS):** `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` — run via the Bash tool and verify exit code 0.
+- **Mention in the reply:** one sentence above the TLDR — "Opened a one-page visual summary in your browser."
 
 ## Caveman mode interaction
 
-Caveman mode and DS Mode are **complementary**, not conflicting (see Precedence at the top of this file).
-
+Caveman mode and DS Mode are **complementary**, not conflicting.
 - Response body: caveman style — drop articles, fragments OK, terse synonyms.
-- TLDR bullets: caveman style is fine *inside* the bullets, as long as each bullet still reads as plain English a non-technical PM understands in one pass. Fragments OK, drop articles, no semicolons. ELI8 spirit still holds — translate jargon, no equations, no proper nouns.
-- HTML one-pager: rendered in full English (not caveman). The page is a deliverable for a PM, not a terminal-friendly compression.
+- TLDR bullets: caveman style is fine *inside* the bullets, as long as each bullet still reads as plain English a non-technical PM understands in one pass. ELI8 spirit still holds.
+- HTML one-pager: rendered in full English (not caveman). It's a deliverable for a PM, not a terminal-friendly compression.
 
 The TLDR block ALWAYS renders. Caveman never skips it.
 
@@ -182,18 +142,15 @@ If `★ Insight ─────` blocks are also requested, keep them inline mid
 
 ## Self-check before sending every response
 
-**You may not send the reply until you have verbally answered each of these. If any HTML answer is "no" when the Prime Directive fires, STOP, build the HTML, then send.**
+You may not send the reply until you have answered each of these. If any HTML answer is "no" when triggers fire, STOP, build the HTML, then send.
 
-1. **HTML — did I build it?** If mode is `full` and prime directive fires (body >3 sentences AND (heading|code block|A/B options|blocker|>=400 words)) OR mode is `visual` and body >3 sentences: I have built and `open`ed the HTML. Mode `lite` or `off`: skip.
-2. **HTML — did I `open` it?** I ran `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` via the Bash tool and saw exit code 0. If not, I run it now.
-3. **HTML — did I mention it in the reply?** Exactly one sentence sits above the TLDR: "Opened a one-page summary in your browser." If missing, I add it.
-4. **TLDR present?** Response > 3 sentences or technical → TLDR block at bottom. Open header literal `☻ TLDR [ds-mode] ───────────────────────────────`, three bullets max, closing rule `─────────────────────────────────────────────────`.
-5. **TLDR clean?** ≤ 3 bullets, ≤ 12 words each, no equations, no proper nouns, no semicolons. Rewrite failing bullets.
-6. **Questions section:** include `⚑ Questions for you` + closing rule only if real blockers exist. If none, omit the entire questions block — no "- none" placeholder.
-7. **Brand label:** every reference in user-facing output should read "DS Mode" — no other expansion.
+1. **HTML — did I build it?** If body is non-trivial AND any HTML trigger fires (length / density / multi-part concept / code + narrative / decision / `/ds-mode` invocation): I have built and `open`ed the HTML.
+2. **HTML — visual, not text-blocks?** Hero SVG at top + illustrated tiles for each concept. No bullet lists or paragraphs as primary content. No tables. Captions are short and plain English.
+3. **HTML — did I `open` it?** Ran `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` via the Bash tool, exit code 0.
+4. **HTML — mentioned in reply?** Exactly one sentence above the TLDR: "Opened a one-page visual summary in your browser."
+5. **TLDR present?** Response > 3 sentences or technical → TLDR block at bottom with the literal header.
+6. **TLDR clean?** ≤ 3 bullets, ≤ 12 words each, no equations, no proper nouns, no semicolons.
+7. **Questions section:** include only if real blockers exist. Otherwise omit entirely — no "- none" placeholder.
+8. **Brand label:** every reference outside the header reads "DS Mode".
 
-Treat this checklist as a gate, not a suggestion. The HTML failing to fire is the #1 way this mode breaks — items 1-3 are the most important checks in the file.
-
-## Brand label
-
-Every reference in user-facing output reads "DS Mode" — no other expansion.
+The HTML failing to fire — or firing as a wall of text — is the #1 way this mode breaks. Treat 1–4 as the most important checks in the file.

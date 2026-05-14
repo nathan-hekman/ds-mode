@@ -1,5 +1,7 @@
 # DS Mode v2 Implementation Plan
 
+> **⚠ SUPERSEDED.** This is the v2 (modes: lite / full / visual / off) implementation plan, replaced by the v3 simplified-to-on/off design. Many components named here (`/dsm`, `ds-mode-user-flows`, `ds-mode-session-summary`, `VALID_MODES`) no longer exist. See [README.md](../../README.md) for current behavior. Kept for historical reference.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Refactor DS Mode from a fragile `outputStyle` setting into a Claude Code plugin with SessionStart + UserPromptSubmit hooks, mode toggle, statusline, and two new user-invocable skills (`/ds-mode-show`, `/ds-mode-user-flows`).

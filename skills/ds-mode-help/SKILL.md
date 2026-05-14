@@ -1,96 +1,80 @@
 ---
 name: ds-mode-help
-description: Quick-reference card for all DS Mode modes, skills, and commands. One-shot display, not a persistent mode. Trigger when user asks "/ds-mode-help", "/dsm help", "what ds-mode commands", "how do I use ds mode", or "ds mode help".
+description: Quick-reference card for DS Mode — what it does, how to toggle it, where files go. One-shot display, not a persistent mode. Trigger when user asks "/ds-mode-help", "what does ds-mode do", "how do I use ds mode", or "ds mode help".
 ---
 
 # DS Mode Help
 
-Display this reference card when invoked. One-shot — do NOT change mode, write flag files, or persist anything. Output in plain prose (no caveman or extreme compression) so the card is readable as a reference.
+Display this reference card when invoked. One-shot — do NOT change any state, write flag files, or persist anything. Output in plain prose (no caveman compression) so the card is readable as a reference.
 
-## What DS Mode is
+## What DS Mode does
 
-A Claude Code plugin that adds two things to non-trivial replies:
+A Claude Code plugin that adds two things to non-trivial replies, automatically:
 
 1. A plain-English **TLDR block** at the bottom of the message — 3 bullets max, 12 words each, ELI8.
-2. An auto-generated **one-page HTML summary** opened in your browser when the prime directive fires (length / density / decision / blocker triggers), or on every reply when `visual` mode is on.
+2. A **visual HTML one-pager** opened in your browser whenever the reply is a decent length (≥ ~300 words, multi-part concept, 2+ headings, code + narrative, or A/B decision). The HTML is illustration-first — hero SVG + captioned tiles, not boxes of text.
+
+DS Mode is **active by default** once installed. No tiers, no flags to memorize.
 
 ### What the TLDR block looks like
 
 ```
-☻ TLDR [ds-mode] ───────────────────────────────
+☻ TLDR [ds-mode] ──────────
 - short plain-English point
 - another point
 - one more, max three
-─────────────────────────────────────────────────
+───────────────
 
 ⚑ Questions for you
 - A) option one  B) option two  C) defer
-─────────────────────────────────────────────────
+───────────────
 ```
 
-`⚑ Questions for you` block only appears when there's at least one real blocker. TLDR block always appears for non-trivial replies.
-
-## Modes
-
-| Mode | Trigger | What changes |
-|------|---------|-------------|
-| **lite** | `/dsm lite` | TLDR block only. No HTML one-pager. |
-| **full** | `/dsm` or `/dsm full` | TLDR + HTML one-pager when prime directive triggers fire. **Default.** |
-| **visual** | `/dsm visual` | TLDR + HTML one-pager on every non-trivial reply (>3 sentences). |
-| **off** | `/dsm off` | Disabled this session. Flag removed; hooks emit nothing. |
-
-Mode persists until changed via `/dsm <mode>` or session end (and even then survives — the flag file at `$CLAUDE_CONFIG_DIR/.ds-mode-active` is read by the SessionStart hook on the next launch).
+The `⚑ Questions for you` block only appears when there's a real blocker. The TLDR block always appears on non-trivial replies.
 
 ## Commands
 
 | Command | What it does |
 |---------|-------------|
-| `/ds-mode` or `/dsm` | Activate at default mode (`full`). |
-| `/dsm lite\|full\|visual` | Set the mode. |
-| `/dsm off` | Disable for this session. |
-| `/ds-mode-session-summary` | Generate a one-page HTML summary of the current Claude Code session and open it in the browser. |
-| `/ds-mode-user-flows` | Generate an HTML + JSON map of the current project's main user-facing flows (persona, steps, outcome) in plain English. Spawns an Explore subagent to map the project. |
+| `/ds-mode` | Confirm DS Mode is active (or re-enable if previously disabled). |
+| `/ds-mode on` | Re-enable for this session. |
+| `/ds-mode off` | Disable for this session. |
+| `/ds-mode <your question>` | Answer the question under DS Mode rules AND force the visual HTML one-pager for this turn, regardless of length. |
 | `/ds-mode-help` | This card. |
 
 ## Natural-language triggers
 
-- "ds mode on" / "activate ds mode" / "turn on ds mode" — activate at default mode
 - "stop ds mode" / "ds mode off" / "disable ds mode" — disable for the session
-- "talk like ds mode" — activate at default mode
+- "ds mode on" / "activate ds mode" / "turn on ds mode" — re-enable
 
-## Configure default mode
+## Configure default
 
-Default mode = `full`. To change it across sessions:
+DS Mode starts active by default. To start sessions disabled:
 
 ```bash
-export DS_MODE_DEFAULT=lite      # or full | visual
+export DS_MODE_DEFAULT=off
 ```
 
-Resolution: `$DS_MODE_DEFAULT` env var > hardcoded fallback (`full`). The installer adds the export to your shell's rc file (`~/.zshrc`, `~/.zshenv`, `~/.bashrc`, or `~/.bash_profile`).
+Apply by adding the export to your shell's rc file (`~/.zshrc`, `~/.bashrc`, etc.).
 
 ## Where files go
 
 | Path | Purpose |
 |------|---------|
-| `$CLAUDE_CONFIG_DIR/.ds-mode-active` | Current mode (`lite`/`full`/`visual`, or absent for `off`). |
-| `$CLAUDE_CONFIG_DIR/settings.json.bak.preDSmode` | One-time backup of pre-install settings.json. |
-| `$TMPDIR/dsmode-summary-<timestamp>.html` | Auto one-pagers fired during normal chat (ephemeral). |
-| `$TMPDIR/dsmode-session-summary-<timestamp>.html` | `/ds-mode-session-summary` output. |
-| `$TMPDIR/dsmode-user-flows-<projectslug>-<timestamp>.{html,json}` | `/ds-mode-user-flows` output. |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-active` | Flag file — exists when DS Mode is active. |
+| `$CLAUDE_CONFIG_DIR/.ds-mode-installed` | Sentinel — written on first run so disable state survives sessions. |
+| `$TMPDIR/dsmode-summary-<timestamp>.html` | Auto-generated one-pagers (ephemeral). |
 
-DS Mode never writes into your project tree or homedir without explicit opt-in.
+DS Mode never writes into your project tree.
 
 ## Uninstall
 
 ```bash
 rm -rf "$CLAUDE_CONFIG_DIR/plugins/marketplaces/ds-mode"
-rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active"
-# Optionally: cp "$CLAUDE_CONFIG_DIR/settings.json.bak.preDSmode" "$CLAUDE_CONFIG_DIR/settings.json"
-# Remove the DS_MODE_DEFAULT export from your shell rc if you don't want it.
+rm -f "$CLAUDE_CONFIG_DIR/.ds-mode-active" "$CLAUDE_CONFIG_DIR/.ds-mode-installed"
 ```
 
 ## More
 
 - Repository: https://github.com/nathan-hekman/ds-mode
 - Install reference: https://github.com/nathan-hekman/ds-mode/blob/main/INSTALL.md
-- Design spec: https://github.com/nathan-hekman/ds-mode/blob/main/docs/specs/2026-05-13-v2-caveman-mirror-design.md

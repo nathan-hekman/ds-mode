@@ -2,70 +2,59 @@
 // ds-mode-activate.js — Claude Code SessionStart hook for DS Mode
 //
 // On every session start:
-//   1. Resolve active mode (from flag file, or default).
-//   2. Write/refresh flag file at $CLAUDE_CONFIG_DIR/.ds-mode-active.
-//   3. If mode != off, emit the DS Mode ruleset filtered to the active mode,
-//      so Claude carries those instructions into the session.
+//   1. Default to ACTIVE unless DS_MODE_DEFAULT=off or a prior session
+//      explicitly disabled and the user has not re-enabled.
+//   2. If active, emit the DS Mode ruleset so Claude carries it into the
+//      session.
 
 const fs = require('fs');
 const path = require('path');
 const {
-  getDefaultMode,
   claudeConfigDir,
   safeWriteFlag,
-  readFlag,
+  isActive,
   deleteFlag,
-  VALID_MODES,
+  defaultIsOff,
 } = require('./ds-mode-config');
 
 const claudeDir = claudeConfigDir();
 const flagPath = path.join(claudeDir, '.ds-mode-active');
 
-// Mode resolution: existing flag wins (user's per-session choice persists),
-// otherwise fall back to the configured default.
-const existing = readFlag(flagPath);
-const mode = (existing && VALID_MODES.includes(existing)) ? existing : getDefaultMode();
+// Flag exists → user kept it active. Flag missing → either first run or
+// user disabled. On first run we honor DS_MODE_DEFAULT=off; otherwise we
+// activate by default.
+const hasFlag = isActive(flagPath);
+const sentinelPath = path.join(claudeDir, '.ds-mode-installed');
+const firstRun = !fs.existsSync(sentinelPath);
 
-if (mode === 'off') {
-  deleteFlag(flagPath);
+if (firstRun) {
+  try { fs.writeFileSync(sentinelPath, '1\n', { mode: 0o600 }); } catch (e) {}
+  if (defaultIsOff()) {
+    deleteFlag(flagPath);
+    process.stdout.write('OK');
+    process.exit(0);
+  }
+  safeWriteFlag(flagPath);
+} else if (!hasFlag) {
+  // User previously disabled — stay disabled.
   process.stdout.write('OK');
   process.exit(0);
 }
 
-safeWriteFlag(flagPath, mode);
-
-// Read the canonical ruleset. Plugin install layout:
-//   __dirname = <plugin_root>/hooks/
-//   ruleset at <plugin_root>/rules/ds-mode.md
-//
-// Kept out of skills/ so Claude Code does not register the file as a
-// user-invocable skill (which would clash with the /ds-mode toggle command).
-const skillPath = path.join(__dirname, '..', 'rules', 'ds-mode.md');
-let skillContent = '';
+// Active — emit the ruleset.
+const rulePath = path.join(__dirname, '..', 'rules', 'ds-mode.md');
+let ruleContent = '';
 try {
-  skillContent = fs.readFileSync(skillPath, 'utf8');
+  ruleContent = fs.readFileSync(rulePath, 'utf8');
 } catch (e) {
-  // Defensive: emit minimal fallback if the SKILL.md was moved.
   process.stdout.write(
-    'DS MODE ACTIVE — mode: ' + mode + '\n' +
+    'DS MODE ACTIVE\n' +
     'TLDR block at bottom of every non-trivial response. ' +
-    'HTML one-pager fires per prime directive. Brand label: "DS Mode".'
+    'Visual HTML one-pager fires when reply is a decent length. ' +
+    'Brand label: "DS Mode".'
   );
   process.exit(0);
 }
 
-// Strip YAML frontmatter.
-const body = skillContent.replace(/^---[\s\S]*?---\s*/, '');
-
-// Filter the Modes table: keep header rows, drop non-active rows.
-const filtered = body.split('\n').reduce((acc, line) => {
-  const tableRowMatch = line.match(/^\|\s*\*\*(\S+?)\*\*\s*\|/);
-  if (tableRowMatch) {
-    if (tableRowMatch[1] === mode) acc.push(line);
-    return acc;
-  }
-  acc.push(line);
-  return acc;
-}, []).join('\n');
-
-process.stdout.write('DS MODE ACTIVE — mode: ' + mode + '\n\n' + filtered);
+const body = ruleContent.replace(/^---[\s\S]*?---\s*/, '');
+process.stdout.write('DS MODE ACTIVE\n\n' + body);

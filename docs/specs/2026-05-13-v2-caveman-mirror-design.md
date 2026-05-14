@@ -1,8 +1,10 @@
 # DS Mode v2 — Caveman-Mirror Plugin Refactor
 
+> **⚠ SUPERSEDED.** This document describes the v2 (modes: lite / full / visual / off) design that was replaced by the v3 simplified-to-on/off design. The `/dsm` alias, `ds-mode-user-flows`, and `ds-mode-session-summary` skills no longer exist. See [README.md](../../README.md) and [rules/ds-mode.md](../../rules/ds-mode.md) for current behavior. Kept for historical reference.
+
 **Date:** 2026-05-13
 **Author:** Nathan Hekman
-**Status:** Awaiting approval
+**Status:** Superseded
 
 ## TL;DR
 
