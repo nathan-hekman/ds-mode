@@ -163,7 +163,7 @@ function reminderFor({ mode, theme, mobileEnabled, mobileCfg, forcedHtml, toggle
   const COMMON =
     `DS MODE ACTIVE (mode: ${mode} · theme: ${theme}). ` +
     'MANDATORY: render the ☻ TLDR [ds-mode] block at the bottom of any non-trivial reply. ' +
-    'TLDR FORMAT (strict): header line `☻ TLDR [ds-mode]` with NO trailing dashes; bullets directly under; NO close-rule dashes (Claude mobile parses dash runs as a table divider and emits literal <tr><td>). ' +
+    'TLDR FORMAT (strict): header line `☻ TLDR [ds-mode] ──────────` (10 × U+2500 INLINE on the header line, never on their own line). Bullets directly under. Questions block (if used) header `⚑ Questions for you ──────────` (same inline-dashes shape). NO standalone close-rule dash lines anywhere — Claude mobile parses dash-only lines as a table divider and emits literal <tr><td>. ' +
     'TLDR CONTENT (hard caps — count before sending): MAX 3 bullets. MAX 12 words per bullet. ELI8 (a 2nd-grader reads it). ZERO jargon — none of: orchestrator, daemon, WebSocket, SIGINT, kernel, async, cron, regex, endpoint, hook, runtime, payload, socket, process, subprocess. ' +
     'Skip the TLDR only for one-line answers, yes/no, or "done" confirmations, or short status/fix updates. ' +
     'Add the ⚑ Questions for you block only when real blockers exist (no close-rule dashes there either). ' +

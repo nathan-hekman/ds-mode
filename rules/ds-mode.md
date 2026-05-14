@@ -57,18 +57,19 @@ Render examples (TLDR required):
 When you do render it:
 
 ```
-☻ TLDR [ds-mode]
+☻ TLDR [ds-mode] ──────────
 - [bullet 1: short, plain English, no jargon]
 - [bullet 2: same]
 - [bullet 3: same, optional, max 3 total]
 
-⚑ Questions for you
+⚑ Questions for you ──────────
 - [question 1: simple, with options if applicable e.g. "A) X  B) Y  C) other"]
 ```
 
 Format rules:
-- **Open header literal:** `☻ TLDR [ds-mode]` (dark-smiley U+263B, space, `TLDR`, space, `[ds-mode]` in lowercase brackets). **No dashes after the header. No close-rule line below the bullets.** Earlier versions added box-drawing dashes (U+2500) as visual separators; Claude's mobile renderer interprets dash runs as markdown table-divider syntax and emits literal `<tr><td>` text in the rendered output. The header chip alone is enough — bullets sit directly under it, no trailing rule.
-- **Questions header literal:** `⚑ Questions for you` (black-flag U+2691). **No rule on the same line, no rule under the questions.** Same reason — dashes break.
+- **Open header literal:** `☻ TLDR [ds-mode] ──────────` (dark-smiley U+263B, space, `TLDR`, space, `[ds-mode]` in lowercase brackets, space, 10 × U+2500). The dashes ride INLINE on the same line as the header text. **Do not put dashes on their own line.** Claude's mobile markdown renderer interprets a line consisting only of dashes (or U+2500 box-drawing chars) as table-divider syntax and emits literal `<tr><td>` text. Keeping the dashes on the header line avoids the trigger.
+- **Questions header literal:** `⚑ Questions for you ──────────` (black-flag U+2691, space, `Questions for you`, space, 10 × U+2500). Same shape — dashes inline, never on their own line.
+- **No close-rule line.** No line of dashes under the bullets, no line of dashes under the question list. Just blank space after the bullets.
 - **Bottom only.** TLDR sits at the very bottom — never top, never middle.
 
 Content rules (HARD CAPS — count before you send):
@@ -270,7 +271,7 @@ You may not send the reply until you have answered each of these. If any HTML an
 2. **HTML — visual, not text-blocks?** Hero SVG at top + illustrated tiles for each concept. No bullet lists or paragraphs as primary content. No tables. Captions are short and plain English.
 3. **HTML — did I `open` it?** Ran `open ${TMPDIR:-/tmp}/dsmode-summary-YYYYMMDD-HHMMSS.html` via the Bash tool, exit code 0.
 4. **HTML — mentioned in reply?** Exactly one sentence above the TLDR: "Opened a one-page visual summary in your browser."
-5. **TLDR present?** Response > 3 sentences or technical → TLDR block at bottom with the literal header `☻ TLDR [ds-mode]`. No dashes after the header. No close-rule line under the bullets.
+5. **TLDR present?** Response > 3 sentences or technical → TLDR block at bottom with the literal header `☻ TLDR [ds-mode] ──────────` (inline dashes). No standalone close-rule line under the bullets.
 6. **TLDR shape — count out loud:**
    a. Count bullets. Is the number exactly ≤ 3? If 4 or 5, delete bullets until 3.
    b. Count words in each bullet. Is each one ≤ 12 words? If any bullet is over, rewrite it shorter — do not let a long bullet ship.

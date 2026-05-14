@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install gh CLI (for plugin validate)
+        run: |
+          type -p curl >/dev/null || sudo apt-get install -y curl
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Install Claude Code CLI (for plugin validate)
+        run: |
+          # Optional: claude CLI for `claude plugin validate`. If not
+          # available in CI image, the test runner skips that one check.
+          if ! command -v claude >/dev/null 2>&1; then
+            echo "claude CLI not installed in CI; static-check 'plugin validate' will be skipped."
+          fi
+
+      - name: Run static checks
+        run: bash tests/static.sh
+        env:
+          NO_COLOR: "1"
+
+      - name: Run dynamic checks
+        # Skip headless-Chrome screenshot test in CI (no Chrome installed).
+        # The dynamic.sh script auto-skips when the Chrome binary isn't at
+        # the standard macOS path, so this just runs everything else.
+        run: bash tests/dynamic.sh
+        env:
+          NO_COLOR: "1"

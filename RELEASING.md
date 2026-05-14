@@ -52,29 +52,64 @@ Release assets win on every axis that matters.
 
 ## Release flow
 
-1. Update `plugin.json` and `marketplace.json` `version` fields. Match.
-2. Stamp a hero PNG locally:
+The canonical path is `scripts/ship.sh`, which gates every release behind
+a test suite + an interactive confirmation prompt. Claude never auto-pushes.
+
+```bash
+scripts/ship.sh patch     # 1.6.0 -> 1.6.1
+scripts/ship.sh minor     # 1.6.0 -> 1.7.0
+scripts/ship.sh major     # 1.6.0 -> 2.0.0
+scripts/ship.sh --dry-run patch    # rehearse without touching git
+```
+
+The script:
+
+1. Runs `tests/run.sh` (static + dynamic). Refuses to proceed on failure.
+2. Bumps `plugin.json` + `marketplace.json` in lockstep.
+3. Re-validates the plugin manifest.
+4. Shows a diff summary and the version that's about to ship.
+5. **Stops and waits for you to type `ship`.** Anything else aborts.
+6. On approval: commits the bump, pushes `main`, creates the
+   `ds-mode--vX.Y.Z` tag via `claude plugin tag`, pushes the tag, and
+   creates a GitHub Release with placeholder notes.
+7. After it exits: edit the release notes on the web (or via
+   `gh release edit`), stamp a hero PNG, and upload it as a release asset:
    ```bash
-   node templates/build.mjs <kind> --slots "$(cat slots.json)" --screenshot
-   ```
-   Pick `status` for patch releases (hero + 1 paragraph), `explainer`
-   for feature releases (hero + 2–3 tiles).
-3. Commit + push the code changes to `main`. **Do NOT commit the PNG.**
-4. `claude plugin tag .` → creates `ds-mode--vX.Y.Z` git tag.
-5. `git push origin refs/tags/ds-mode--vX.Y.Z`.
-6. Create the GitHub Release:
-   ```bash
-   gh release create ds-mode--vX.Y.Z \
-     --title "DS Mode vX.Y.Z — <short tagline>" \
-     --notes "$(cat release-notes.md)"
-   ```
-7. Upload the hero PNG as a release asset:
-   ```bash
+   node templates/build.mjs status --slots "$(cat slots.json)" --screenshot
    gh release upload ds-mode--vX.Y.Z /tmp/v<X.Y.Z>.png --clobber
    ```
-   Rename the file `v<X.Y.Z>.png` first so the asset URL is predictable.
-8. Verify the hero image renders on the release page. Refresh once;
-   GitHub caches eagerly.
+
+## Tests — what they check
+
+`tests/run.sh` runs two suites:
+
+- **`tests/static.sh`** — manifest validation, version-match between
+  plugin.json and marketplace.json, syntax of every hook script and the
+  stamper, no pictographic-emoji leak, no standalone-dash lines (the
+  Claude-mobile table-bait regression), TLDR sample-header shape in both
+  rules and help docs, command argument-hint hygiene, all four templates
+  present, README mentions every documented subcommand.
+- **`tests/dynamic.sh`** — runs the activate and tracker hooks against a
+  throwaway `CLAUDE_CONFIG_DIR`, dispatches every command (lite, full,
+  off, dark, theme writes, mobile status, /ds-mode <prompt>), verifies
+  reminder shape, stamps each of the four templates and asserts valid
+  HTML, optionally screenshots via headless Chrome, checks statusline
+  chip with and without the update flag.
+
+GitHub Actions runs both suites on every push to `main` and every PR via
+`.github/workflows/ci.yml`. Add the green badge to README once a workflow
+run succeeds.
+
+## When to bump major / minor / patch
+
+- **major** — breaking change to a documented command, the TLDR shape, or
+  any file the user might reasonably depend on. Rare. Last (and only) was
+  v1.0.0.
+- **minor** — new feature or removed feature without breaking existing
+  flags. Theme toggle (v1.1.0), update detection (v1.2.0), mobile mode
+  (v1.3.0), docs sweep (v1.4.0), surfer-egg removal (v1.5.0), tests +
+  ship gate (v1.6.0).
+- **patch** — bug fix, visual polish, doc tweak. No new behavior.
 
 ## Release notes template
 
