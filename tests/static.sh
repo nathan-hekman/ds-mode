@@ -28,10 +28,14 @@ heading() { printf '\n%s· %s%s\n' "$DIM" "$1" "$RESET"; }
 
 # ----- 1. Plugin manifest -----
 heading "plugin manifest"
-if claude plugin validate . >/dev/null 2>&1; then
-  pass "claude plugin validate"
+if command -v claude >/dev/null 2>&1; then
+  if claude plugin validate . >/dev/null 2>&1; then
+    pass "claude plugin validate"
+  else
+    fail "claude plugin validate" "manifest validation failed (run \`claude plugin validate .\` for details)"
+  fi
 else
-  fail "claude plugin validate" "manifest validation failed (run \`claude plugin validate .\` for details)"
+  printf '  %s· skipped: claude CLI not on PATH (typical for CI runners)%s\n' "$DIM" "$RESET"
 fi
 
 # Check plugin.json + marketplace.json versions agree.
