@@ -29,6 +29,7 @@ const themePath = path.join(claudeDir, '.ds-mode-theme');
 const mobilePath = path.join(claudeDir, '.ds-mode-mobile');
 
 let mobileNote = '';
+let previewNote = '';
 
 let input = '';
 process.stdin.on('data', chunk => { input += chunk; });
@@ -45,6 +46,7 @@ process.stdin.on('end', () => {
     const arg = m ? m[1].trim() : '';
     const argLower = arg.toLowerCase();
     const mobileMatch = argLower.match(/^mobile(?:\s+(on|off|setup|status))?$/);
+    const previewMatch = argLower.match(/^preview(?:\s+(on|off|status))?$/);
 
     if (!arg) {
       ensureActive();
@@ -65,6 +67,9 @@ process.stdin.on('end', () => {
     } else if (mobileMatch) {
       handleMobileSubcommand(mobileMatch[1] || 'status');
       ensureActive();
+    } else if (previewMatch) {
+      handlePreviewSubcommand(previewMatch[1] || 'status');
+      ensureActive();
     } else {
       // free-text → force HTML this turn
       ensureActive();
@@ -84,8 +89,24 @@ process.stdin.on('end', () => {
   const theme = readTheme(themePath) || getDefaultTheme();
   const mobileEnabled = mobileIsEnabled(mobilePath);
   const mobileCfg = readMobileConfig(mobilePath);
-  process.stdout.write(reminderFor({ mode, theme, mobileEnabled, mobileCfg, forcedHtml, toggleNote, mobileNote }));
+  const previewState = readPreviewState();
+  process.stdout.write(reminderFor({
+    mode, theme,
+    mobileEnabled, mobileCfg,
+    previewState,
+    forcedHtml, toggleNote, mobileNote, previewNote,
+  }));
 });
+
+function readPreviewState() {
+  try {
+    const p = path.join(process.cwd(), '.ds-mode', 'preview.json');
+    const raw = fs.readFileSync(p, 'utf8');
+    const data = JSON.parse(raw);
+    if (data && typeof data === 'object' && data.enabled === true) return data;
+  } catch (e) {}
+  return null;
+}
 
 function ensureActive() {
   const cur = readMode(flagPath);
@@ -158,7 +179,51 @@ function handleMobileSubcommand(sub) {
   }
 }
 
-function reminderFor({ mode, theme, mobileEnabled, mobileCfg, forcedHtml, toggleNote, mobileNote }) {
+function handlePreviewSubcommand(sub) {
+  const previewScript = path.resolve(__dirname, 'ds-mode-preview.js');
+
+  if (sub === 'on') {
+    previewNote =
+      ' /ds-mode preview on invoked (Research Preview feature). Follow these steps in order: ' +
+      '(1) FIRST verify the `mcp__Claude_Preview__preview_start` tool is available in this session. ' +
+      'If it is NOT available, abort BEFORE touching any files and tell the user: "DS Mode Preview ' +
+      'requires Claude Desktop. The preview_start tool is not available in this session. No files were modified." ' +
+      '(2) If the tool IS available, CONFIRM with the user in ONE line and wait for explicit yes/no: ' +
+      '"Enable DS Mode Preview for THIS project? I will write .claude/launch.json (merging any existing ' +
+      'configs), append .ds-mode/ to .gitignore, create a .ds-mode/ folder, and start a tiny local feed ' +
+      'server on 127.0.0.1 that the Preview pane mounts. [yes/no]" ' +
+      '(3) If yes, run: `node "' + previewScript + '" on` from the user\'s project root via Bash. ' +
+      'Parse the JSON it prints to stdout. ' +
+      '(4) Call mcp__Claude_Preview__preview_start with { "name": "ds-mode-feed" }. ' +
+      '(5) Confirm to the user in one line: "DS Mode Preview is ON for <project>. Pane mounted on ' +
+      'http://127.0.0.1:<port>/. The pane auto-refreshes every 3 seconds. Disable with /ds-mode preview off." ' +
+      'Do NOT generate a TLDR or HTML one-pager for this turn.';
+    return;
+  }
+
+  if (sub === 'off') {
+    previewNote =
+      ' /ds-mode preview off invoked. Follow these steps in order: ' +
+      '(1) Run: `node "' + previewScript + '" off` from the user\'s project root via Bash. ' +
+      'Parse the JSON it prints. ' +
+      '(2) If the `mcp__Claude_Preview__preview_list` tool is available, call it, find the server entry ' +
+      'whose name is "ds-mode-feed" (or whose runtimeArgs reference preview-server.mjs), and call ' +
+      'mcp__Claude_Preview__preview_stop with that serverId. If the tool is not available, skip this step. ' +
+      '(3) Confirm to the user in one line: "DS Mode Preview is OFF for <project>. .claude/launch.json ' +
+      'cleaned up. .ds-mode/ directory left in place — delete manually to clear past visuals." ' +
+      'Do NOT generate a TLDR or HTML one-pager for this turn.';
+    return;
+  }
+
+  // status
+  previewNote =
+    ' /ds-mode preview status invoked. Run: `node "' + previewScript + '" status` from the user\'s ' +
+    'project root via Bash. Parse the JSON it prints. Report to the user in one concise line whether ' +
+    'preview is ON or OFF for this project, and if ON include the port and server name. Do NOT generate ' +
+    'a TLDR or HTML one-pager for this turn.';
+}
+
+function reminderFor({ mode, theme, mobileEnabled, mobileCfg, previewState, forcedHtml, toggleNote, mobileNote, previewNote }) {
   const stamperPath = path.resolve(__dirname, '..', 'templates', 'build.mjs');
   const COMMON =
     `DS MODE ACTIVE (mode: ${mode} · theme: ${theme}). ` +
@@ -207,5 +272,16 @@ function reminderFor({ mode, theme, mobileEnabled, mobileCfg, forcedHtml, toggle
       'logged-in GitHub session.';
   }
 
-  return COMMON + html + themeClause + mobileClause + (toggleNote || '') + (mobileNote || '') + forcedClause;
+  let previewClause = '';
+  if (previewState && previewState.enabled) {
+    previewClause =
+      ' DS Mode Preview is ON for this project (Research Preview). The stamper now auto-routes its HTML ' +
+      'output into .ds-mode/ inside the project root, so every visual one-pager you generate this turn ' +
+      'will also appear in the Preview pane on http://127.0.0.1:' + (previewState.port || 49100) + '/ ' +
+      'within ~3 seconds. Keep stamping normally — no extra flags needed. The pane will list newest-first ' +
+      'with the latest visual inlined.';
+  }
+
+  return COMMON + html + themeClause + mobileClause + previewClause +
+    (toggleNote || '') + (mobileNote || '') + (previewNote || '') + forcedClause;
 }

@@ -91,10 +91,31 @@ const timestamp = new Date()
   .toISOString().replace(/[-:T]/g, '').slice(0, 14)
   .replace(/(\d{8})(\d{6})/, '$1-$2');
 const tmp = process.env.TMPDIR || tmpdir();
+
+// If DS Mode Preview is ON for the current project (Research Preview),
+// route output into <cwd>/.ds-mode/ instead of $TMPDIR so the local feed
+// server can pick it up. Detection is purely file-based (no env var or
+// MCP coupling) so the stamper stays standalone.
+const autoFeedDir = detectPreviewFeedDir();
 const outHtml = flags.out
   ? pathResolve(flags.out)
-  : join(tmp, `dsmode-summary-${timestamp}.html`);
+  : (autoFeedDir
+      ? join(autoFeedDir, `dsmode-summary-${timestamp}.html`)
+      : join(tmp, `dsmode-summary-${timestamp}.html`));
 const outPng = outHtml.replace(/\.html$/, '.png');
+
+function detectPreviewFeedDir() {
+  try {
+    const statePath = join(process.cwd(), '.ds-mode', 'preview.json');
+    const raw = readFileSync(statePath, 'utf8');
+    const state = JSON.parse(raw);
+    if (state && state.enabled === true) {
+      const dir = join(process.cwd(), state.feed_dir || '.ds-mode');
+      return dir;
+    }
+  } catch (e) {}
+  return null;
+}
 
 // -------- shared CSS with theme override --------
 const sharedCss = readFileSync(join(__dirname, '_shared.css'), 'utf8');

@@ -1,6 +1,6 @@
 ---
-description: "Switch DS Mode (lite/full/off/on), theme (dark/light/auto), mobile mode (setup/on/off/status), or answer a one-shot prompt with a forced visual HTML one-pager."
-argument-hint: "lite | full | off | on | dark | light | auto | mobile setup|on|off|status | <your question>"
+description: "Switch DS Mode (lite/full/off/on), theme (dark/light/auto), mobile mode (setup/on/off/status), preview pane (on/off/status — Research Preview, Claude Desktop only), or answer a one-shot prompt with a forced visual HTML one-pager."
+argument-hint: "lite | full | off | on | dark | light | auto | mobile setup|on|off|status | preview on|off|status | <your question>"
 ---
 
 Interpret `$ARGUMENTS` as follows. Match exactly — do not be creative.
@@ -23,6 +23,16 @@ Interpret `$ARGUMENTS` as follows. Match exactly — do not be creative.
   switch in one line. For dark: "DS Mode theme → dark." For light: "DS
   Mode theme → light." For auto: "DS Mode theme → auto (follows your
   OS preference)." Do not generate a TLDR or HTML.
+
+- If `$ARGUMENTS` starts with `preview`: handled by the tracker hook,
+  which leaves an instruction in the prompt context. Follow it
+  exactly. Three sub-commands (`preview on|off|status`). This is a
+  **Research Preview** feature; works only on Claude Desktop where the
+  `mcp__Claude_Preview__preview_start` MCP tool is available. The
+  hook's instruction tells you to verify tool availability, ask for
+  user confirmation before touching files, run the preview script,
+  then call the MCP tool. Confirm the action in one line and do not
+  generate a TLDR or HTML.
 
 - If `$ARGUMENTS` starts with `mobile`: handled by the tracker hook,
   which leaves an instruction in the prompt context. Follow that

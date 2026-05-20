@@ -63,6 +63,9 @@ Theme persists in `$CLAUDE_CONFIG_DIR/.ds-mode-theme`.
 | `/ds-mode off` | Disable for this session. |
 | `/ds-mode dark` / `/ds-mode light` / `/ds-mode auto` | Pin or auto-follow the OS theme for the HTML one-pager. |
 | `/ds-mode <your question>` | Answer the question AND force the visual HTML one-pager for this turn — works in both lite and full mode. |
+| `/ds-mode preview on` | **Research Preview.** Claude Desktop only. Enables side-by-side Preview pane that shows DS Mode visuals as you generate them. Writes `.claude/launch.json` and starts a tiny local feed server. Asks for confirmation first. |
+| `/ds-mode preview off` | Disables Preview pane for this project. Removes the `ds-mode-feed` entry from `.claude/launch.json` and stops the server. Leaves `.ds-mode/` directory in place. |
+| `/ds-mode preview status` | Reports whether Preview is on or off for the current project. |
 | `/ds-mode-help` | This card. |
 
 ## Natural-language triggers
@@ -173,8 +176,38 @@ Network failures are silent — a missed check just means you'll find out one se
 | `$CLAUDE_CONFIG_DIR/.ds-mode-update-available` | Latest version string when a newer release exists. |
 | `$TMPDIR/dsmode-summary-<timestamp>.html` | Auto-generated one-pagers (ephemeral). |
 | `$TMPDIR/dsmode-summary-<timestamp>.png` | Sibling screenshot when the stamper was called with `--screenshot`. |
+| `<project>/.ds-mode/preview.json` | Preview pane state — present only when `/ds-mode preview on` was run for that project. |
+| `<project>/.ds-mode/dsmode-summary-*.html` | Visuals routed here (instead of `$TMPDIR`) when Preview is on for the project. |
+| `<project>/.claude/launch.json` | Receives a `ds-mode-feed` entry when `/ds-mode preview on` was run. Removed on `preview off`. |
 
-DS Mode never writes into your project tree.
+DS Mode never writes into your project tree **except** when you explicitly opt into Preview pane mode for that project. The default behavior is unchanged: all output goes to `$TMPDIR`.
+
+## Preview pane (Research Preview)
+
+Off by default. Opt-in per project. Claude Desktop only.
+
+When enabled, DS Mode visuals appear in the Preview pane next to your chat — auto-mounted, auto-refreshing every 3 seconds, with the newest one-pager inlined and a chronological list below it. The pane uses the same `preview_start` mechanism Claude Desktop's "Set up" button uses, so it integrates natively.
+
+```
+/ds-mode preview on      # asks for confirmation, then enables
+/ds-mode preview off     # cleans up launch.json and stops the server
+/ds-mode preview status  # reports current state
+```
+
+Mechanics:
+
+- A 60-line Node feed server (`hooks/preview-server.mjs`) binds to `127.0.0.1:49100` with an Origin/Host check.
+- An entry named `ds-mode-feed` is merged into your existing `.claude/launch.json` (if any), preserving every other config.
+- `.ds-mode/` is added to `.gitignore`.
+- The stamper auto-detects the state file and writes its HTML into `<project>/.ds-mode/` instead of `$TMPDIR`.
+- All file modifications happen only after you confirm with "yes".
+
+Boundaries:
+
+- May change without notice (Research Preview).
+- Works only in sessions where `mcp__Claude_Preview__preview_start` is available — i.e., Claude Desktop's Code tab.
+- The Preview pane shows one server at a time. If your project already has its own dev server in `launch.json`, both entries coexist; toggle between them via the Preview dropdown.
+- `/ds-mode preview off` leaves `.ds-mode/` in place so you don't lose past visuals. Delete the directory manually if you want a clean slate.
 
 ## Uninstall
 
