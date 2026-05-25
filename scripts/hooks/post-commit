@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Auto-sync ds-mode source to Claude Code's cached copy after each commit.
+# Reads the active version from .claude-plugin/plugin.json so a version bump
+# automatically targets the new cache dir (assuming /plugin install or a
+# manual installed_plugins.json bump has already created it).
+#
+# Without this hook, the cache at ~/.claude/plugins/cache/ds-mode/ds-mode/<ver>/
+# stays frozen at the snapshot taken on install, and edits to hooks/templates/
+# rules don't take effect until /plugin reinstall.
+#
+# Install: scripts/install-git-hooks.sh (or copy this file to .git/hooks/).
+set -euo pipefail
+
+REPO="$(git rev-parse --show-toplevel)"
+VERSION="$(node -p "require('$REPO/.claude-plugin/plugin.json').version" 2>/dev/null || echo "")"
+
+if [ -z "$VERSION" ]; then
+  echo "post-commit: could not read version from .claude-plugin/plugin.json — skip"
+  exit 0
+fi
+
+CACHE="$HOME/.claude/plugins/cache/ds-mode/ds-mode/$VERSION"
+
+if [ ! -d "$CACHE" ]; then
+  echo "post-commit: cache dir $CACHE does not exist — run /plugin update ds-mode or bump installed_plugins.json"
+  exit 0
+fi
+
+rsync -a --delete \
+  --exclude='out/' \
+  --exclude='runs/' \
+  --exclude='.git/' \
+  --exclude='__pycache__/' \
+  --exclude='.env' \
+  "$REPO/" "$CACHE/" >/dev/null
+
+echo "post-commit: synced ds-mode repo -> cache $VERSION"

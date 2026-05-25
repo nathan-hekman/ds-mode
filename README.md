@@ -204,4 +204,6 @@ PRs welcome. Especially:
 - Translations of the plain-English style for other languages
 - Cross-platform fixes for the `open` behavior (Linux, Windows)
 
+After cloning for development, run `scripts/install-git-hooks.sh` to install the post-commit cache-sync hook. Without it, edits to `hooks/` / `templates/` / `rules/` don't reach the plugin cache until `/plugin update ds-mode`.
+
 Open an issue at [nathan-hekman/ds-mode/issues](https://github.com/nathan-hekman/ds-mode/issues) to request a port or report a bug.
