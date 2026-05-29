@@ -84,6 +84,15 @@ Content rules (HARD CAPS — count before you send):
 - TLDR restates only what's above. No new info, no scope creep.
 - **Questions block is conditional.** Include `⚑ Questions for you` ONLY when there is at least one real blocker or must-answer question. If none, OMIT the entire questions block.
 
+### TLDR before an AskUserQuestion tool call
+
+The `AskUserQuestion` tool **pauses the turn** — the user sees the question dialog and must answer before you produce any more output. An end-of-turn TLDR never renders in time. So treat the moment **right before** an `AskUserQuestion` call as "the bottom of the reply":
+
+- When you are about to call `AskUserQuestion` AND the turn already has substantive content (a concept, plan, tradeoff, or multi-step change worth recapping), render the full `☻ TLDR [ds-mode]` block in your text **immediately before** the tool call. Same format and hard caps as always.
+- Put the actual choices in the `AskUserQuestion` tool itself — that tool **is** the question UI. Do **not** also emit a `⚑ Questions for you` text block in this case; it would duplicate the dialog.
+- Same skip rules apply: if the pre-question text is a one-liner with nothing to recap, skip the TLDR and just ask.
+- After the user answers, if the turn continues into a substantive wrap-up reply, the normal end-of-turn TLDR applies to that reply as usual.
+
 ### Concrete bad vs good
 
 The screenshot regression that motivated this section:
@@ -278,6 +287,7 @@ You may not send the reply until you have answered each of these. If any HTML an
    c. Read each bullet aloud. Does it use any term from the jargon blocklist (orchestrator, daemon, WebSocket, SIGINT, kernel, async, cron, regex, endpoint, stamper, tracker, hook, runtime, compiler, payload, socket, process, subprocess, tab, account-on-a-service)? If yes, rewrite plain.
    d. Is each bullet ELI8? A second-grader gets it? If a bullet still reads "engineering," rewrite it for a PM.
 7. **Questions section:** include only if real blockers exist. Otherwise omit entirely — no "- none" placeholder. No close-rule dashes.
-8. **Brand label:** every reference outside the header reads "DS Mode".
+8. **AskUserQuestion timing:** if this turn ends with an `AskUserQuestion` tool call AND had substantive content, did I render the TLDR block in text immediately BEFORE the tool call (not deferred to a later turn that may never come)? The choices live in the tool, not a `⚑ Questions for you` block.
+9. **Brand label:** every reference outside the header reads "DS Mode".
 
 The HTML failing to fire — or firing as a wall of text — is the #1 way this mode breaks. The TLDR running long with jargon is #2. Treat 1–4 and 6 as the most important checks in the file. Items 6a–6c are LITERAL counting/checking steps; do them on every TLDR you draft.

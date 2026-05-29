@@ -232,6 +232,7 @@ function reminderFor({ mode, theme, mobileEnabled, mobileCfg, previewState, forc
     'CRITICAL: render the TLDR header + bullets as PLAIN MARKDOWN — do NOT wrap them in a fenced code block (triple backticks) or any other code formatting. The U+2500 box-drawing chars are not ASCII hyphens and do not trigger Setext-heading or table-divider parsing, so the header is safe as plain text. Wrapping in a code fence makes mobile render the whole TLDR as a gray monospace block. ' +
     'TLDR CONTENT (hard caps — count before sending): MAX 3 bullets. MAX 12 words per bullet. ELI8 (a 2nd-grader reads it). ZERO jargon — none of: orchestrator, daemon, WebSocket, SIGINT, kernel, async, cron, regex, endpoint, hook, runtime, payload, socket, process, subprocess. ' +
     'Skip the TLDR only for one-line answers, yes/no, or "done" confirmations, or short status/fix updates. ' +
+    'BEFORE AN AskUserQuestion TOOL CALL: that tool pauses the turn, so an end-of-turn TLDR never renders before the user must answer. When you are about to call AskUserQuestion AND the turn already has substantive content, render the full TLDR block in your text IMMEDIATELY BEFORE the tool call. Put the choices in the AskUserQuestion tool itself — do NOT also emit a ⚑ Questions for you text block in that case. ' +
     'Add the ⚑ Questions for you block only when real blockers exist (no close-rule dashes there either). ' +
     'Brand label outside the header is always "DS Mode".';
 
