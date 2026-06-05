@@ -243,7 +243,10 @@ function reminderFor({ mode, theme, mobileEnabled, mobileCfg, previewState, forc
       '(≥~300 words, 2+ headings, multi-part concept, code+narrative, A/B decision). ' +
       'The HTML must be illustration-first: hero SVG + captioned tiles, NOT bullet lists or paragraph blocks. ' +
       `For the common 4 shapes (explainer / comparison / decision / status) use the stamper: \`node "${stamperPath}" <kind> --slots '<json>' --screenshot\`. ` +
-      'For shapes outside those four — tree diagrams, timelines, full-bleed hero, unusual tile counts — either stamp + post-edit, OR hand-write the HTML using the same tokens from `templates/_shared.css`. The stamper is a starting point, not a cage. Tile captions ≤ 12 words. ELI8.';
+      'For shapes outside those four — tree diagrams, timelines, full-bleed hero, unusual tile counts — either stamp + post-edit, OR hand-write the HTML using the same tokens from `templates/_shared.css`. The stamper is a starting point, not a cage. Tile captions ≤ 12 words. ELI8.' +
+      ' INLINE RENDER (primary delivery): the stamper run with --screenshot prints the .png path on its own line after the .html path. ' +
+      'IMMEDIATELY Read that .png path with the Read tool — Claude Code renders PNGs inline, so the one-pager appears directly in the chat (works on mobile and desktop). ' +
+      'Do this every time you stamp a one-pager. The inline image IS how the user sees the visual now — it replaces tapping a link as the default.';
   } else {
     html =
       ' Lite mode: NO HTML one-pager unless user explicitly invokes /ds-mode <prompt>. ' +
@@ -261,17 +264,17 @@ function reminderFor({ mode, theme, mobileEnabled, mobileCfg, previewState, forc
   if (forcedHtml) {
     forcedClause =
       ' /ds-mode WAS INVOKED WITH A PROMPT — HTML one-pager is MANDATORY for this turn regardless of mode and regardless of reply length. ' +
-      'Use templates/build.mjs to stamp it, then `open` it via Bash.';
+      'Use templates/build.mjs with --screenshot to stamp it, then Read the printed .png path so it renders inline in the chat.';
   }
 
   let mobileClause = '';
   if (mobileEnabled && mobileCfg) {
     mobileClause =
-      ' Mobile mode is ON: when the stamper runs with --screenshot, it auto-publishes the PNG to ' +
-      'https://github.com/' + mobileCfg.repo + ' (private, owner-only) in the background. ' +
-      'The stamper prints a second URL line after the PNG path — include that URL verbatim in your reply, ' +
-      'placed near the "Opened a one-page visual summary" mention. Phone users tap it to view in their ' +
-      'logged-in GitHub session.';
+      ' Mobile mode is ON: in addition to the inline render (which is the primary delivery), the stamper ' +
+      'run with --screenshot auto-publishes the PNG to https://github.com/' + mobileCfg.repo + ' (private, ' +
+      'owner-only) in the background. The stamper prints the GitHub URL on the line after the PNG path — include that ' +
+      'URL verbatim in your reply as a persistent/phone-fallback link, placed near the "Opened a one-page ' +
+      'visual summary" mention. It is a backup share link; the inline image is still the main way the user sees it.';
   }
 
   let previewClause = '';
