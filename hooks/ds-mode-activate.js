@@ -66,7 +66,25 @@ const header = `DS MODE ACTIVE — mode: ${mode} · theme: ${theme} · version: 
 // ----- main ruleset -----
 const rulePath = path.join(__dirname, '..', 'rules', 'ds-mode.md');
 let body = '';
-try {
+// Lite mode: emit a compact ruleset (~600 tok) instead of the full ~5.6k-token
+// rules file. The full instructions only matter for full-mode auto-HTML; lite
+// needs just the TLDR contract + the explicit-/ds-mode HTML escape hatch.
+if (mode === 'lite') {
+  body =
+    'DS Mode is LITE.\n\n' +
+    '1. TLDR BLOCK (mandatory on non-trivial replies; skip for one-line/yes-no/"done"/short status). ' +
+    'At the very bottom, plain markdown (never code-fenced):\n' +
+    'Header line `☻ TLDR [ds-mode] ──────────` (the dashes are U+2500, inline on the header line). ' +
+    'Then MAX 3 bullets, MAX 12 words each, ELI8, zero jargon. No standalone dash-only rule lines anywhere.\n' +
+    '2. NO HTML one-pager in lite mode UNLESS the user explicitly invokes `/ds-mode <prompt>`. Skip the stamper otherwise.\n' +
+    '3. IMAGES — do NOT auto-Read every PNG/screenshot. Read an image inline ONLY when the user needs to SEE a finished visual ' +
+    '(a one-pager you built on request, a final rendered result, a screenshot they asked about). During iteration/debugging prefer ' +
+    'cheap TEXT tools: preview_snapshot, preview_console_logs, preview_logs, preview_network over preview_screenshot; ' +
+    'zoom/crop computer-use shots instead of repeated full-screen grabs. Screenshot only the final proof.\n' +
+    '4. Brand label outside the header is always "DS Mode".\n' +
+    `5. Theme is ${theme}; if you do build a one-pager on request, ${theme === 'auto' ? 'let it follow OS dark-mode preference' : 'pass `--theme ' + theme + '`'}.`;
+}
+if (mode !== 'lite') try {
   const raw = fs.readFileSync(rulePath, 'utf8');
   body = raw.replace(/^---[\s\S]*?---\s*/, '');
   // Filter the Modes table: keep only the active mode's row.

@@ -225,8 +225,17 @@ function handlePreviewSubcommand(sub) {
 
 function reminderFor({ mode, theme, mobileEnabled, mobileCfg, previewState, forcedHtml, toggleNote, mobileNote, previewNote }) {
   const stamperPath = path.resolve(__dirname, '..', 'templates', 'build.mjs');
-  const COMMON =
-    `DS MODE ACTIVE (mode: ${mode} · theme: ${theme}). ` +
+  // The full format spec is restated at SessionStart. The per-prompt reminder
+  // only needs to keep the contract alive turn-to-turn. In lite mode emit a
+  // compact version (~250 tok) instead of the full one (~675 tok); full mode
+  // keeps the verbose spec since its auto-HTML behavior is higher-stakes.
+  const COMMON = (mode === 'lite')
+    ? `DS MODE ACTIVE (mode: ${mode} · theme: ${theme}). ` +
+      'Render the ☻ TLDR [ds-mode] block at the bottom of non-trivial replies (skip for one-line / yes-no / "done" / short status). ' +
+      'Header `☻ TLDR [ds-mode] ──────────` (U+2500 dashes INLINE on the header line) as PLAIN markdown, never code-fenced; then MAX 3 bullets, MAX 12 words each, ELI8, zero jargon. No standalone dash-only lines. ' +
+      'If calling AskUserQuestion with substantive content already in the turn, render the TLDR in text IMMEDIATELY BEFORE the tool call (choices go in the tool, not a ⚑ text block). ' +
+      'IMAGES: do not auto-Read every screenshot/PNG; Read inline only to show a finished visual, prefer text preview tools while iterating.'
+    : `DS MODE ACTIVE (mode: ${mode} · theme: ${theme}). ` +
     'MANDATORY: render the ☻ TLDR [ds-mode] block at the bottom of any non-trivial reply. ' +
     'TLDR FORMAT (strict): header line `☻ TLDR [ds-mode] ──────────` (10 × U+2500 INLINE on the header line, never on their own line). Bullets directly under. Questions block (if used) header `⚑ Questions for you ──────────` (same inline-dashes shape). NO standalone close-rule dash lines anywhere — Claude mobile parses dash-only lines as a table divider and emits literal <tr><td>. ' +
     'CRITICAL: render the TLDR header + bullets as PLAIN MARKDOWN — do NOT wrap them in a fenced code block (triple backticks) or any other code formatting. The U+2500 box-drawing chars are not ASCII hyphens and do not trigger Setext-heading or table-divider parsing, so the header is safe as plain text. Wrapping in a code fence makes mobile render the whole TLDR as a gray monospace block. ' +
