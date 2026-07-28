@@ -63,7 +63,11 @@ When you do render it:
 - [bullet 3: same, optional, max 3 total]
 
 ⚑ Questions for you ──────────
-- [question 1: simple, with options if applicable e.g. "A) X  B) Y  C) other"]
+- **[question 1, in plain words?]**
+  What's going on: [one plain sentence — the situation that makes this a choice]
+  - **A) [short label]** — [what happens if you pick it, plain English]
+  - **B) [short label]** — [same]
+  My pick: **[A/B]** — [one short reason].
 ```
 
 Format rules:
@@ -84,12 +88,38 @@ Content rules (HARD CAPS — count before you send):
 - TLDR restates only what's above. No new info, no scope creep.
 - **Questions block is conditional.** Include `⚑ Questions for you` ONLY when there is at least one real blocker or must-answer question. If none, OMIT the entire questions block.
 
+### The questions block must be self-contained
+
+A question buried in the body is a question the user has to dig for. The failure this fixes: the reply mentions a choice in passing ("we could also tighten the threshold"), the user reads the TLDR, sees nothing to decide, and only finds out there was an open question by asking "so what do you suggest?" a turn later. That round-trip is the bug.
+
+So when the block fires, each question carries its own context — the reader must be able to answer it **without scrolling up into the body**:
+
+- **Name the problem first.** One plain sentence under the question: what's going on that makes this a decision. Not the technical cause — the situation. ("The alarm can't tell 'waiting on you' apart from 'truly broken'.")
+- **Lay out the options.** 2–4 of them, lettered, each with a short label and a plain-English consequence. Say what the user *gets* and what they *give up*, not what the code does.
+- **Always recommend.** End with `My pick: **B** — [one short reason].` Never present options flat and wait to be asked which one you'd choose. If you genuinely have no preference, say why in one clause.
+- **Plain English, same bar as the TLDR bullets.** No jargon blocklist terms, no file paths, no function names. The body carries the technical depth; this block carries the decision.
+
+Caps: **MAX 2 questions.** **MAX 4 options each.** **MAX ~20 words per option line.** More than two open decisions means the reply is doing too much — pick the two that actually block progress and fold the rest into the body.
+
+### When the questions block fires
+
+Include it whenever the reply leaves a real decision open — whether or not you call `AskUserQuestion`. Concrete triggers:
+
+- You wrote "we could", "you may want to", "worth deciding", "another option", "unless you'd rather" anywhere in the body.
+- You did work under an assumption the user hasn't confirmed, and a different assumption would mean different work.
+- You found a second problem while fixing the first and didn't fix it.
+- You are recommending something the user hasn't agreed to yet.
+- You asked a rhetorical question in the body. Rhetorical questions in the body are the tell — either answer it yourself, or promote it here.
+
+Do NOT fire it for: things you already decided and stated, questions the user just answered, or "let me know if you want more" pleasantries. A question with no consequence attached is filler, not a blocker.
+
 ### TLDR before an AskUserQuestion tool call
 
 The `AskUserQuestion` tool **pauses the turn** — the user sees the question dialog and must answer before you produce any more output. An end-of-turn TLDR never renders in time. So treat the moment **right before** an `AskUserQuestion` call as "the bottom of the reply":
 
 - When you are about to call `AskUserQuestion` AND the turn already has substantive content (a concept, plan, tradeoff, or multi-step change worth recapping), render the full `☻ TLDR [ds-mode]` block in your text **immediately before** the tool call. Same format and hard caps as always.
 - Put the actual choices in the `AskUserQuestion` tool itself — that tool **is** the question UI. Do **not** also emit a `⚑ Questions for you` text block in this case; it would duplicate the dialog.
+- The tool call inherits the same standard: state the problem in one plain sentence before the call, give each option a consequence in its `description` (what you get, what you give up), and mark your recommendation `(Recommended)` as the first option. A dialog full of bare labels is the same failure as a buried question.
 - Same skip rules apply: if the pre-question text is a one-liner with nothing to recap, skip the TLDR and just ask.
 - After the user answers, if the turn continues into a substantive wrap-up reply, the normal end-of-turn TLDR applies to that reply as usual.
 
@@ -287,6 +317,7 @@ You may not send the reply until you have answered each of these. If any HTML an
    c. Read each bullet aloud. Does it use any term from the jargon blocklist (orchestrator, daemon, WebSocket, SIGINT, kernel, async, cron, regex, endpoint, stamper, tracker, hook, runtime, compiler, payload, socket, process, subprocess, tab, account-on-a-service)? If yes, rewrite plain.
    d. Is each bullet ELI8? A second-grader gets it? If a bullet still reads "engineering," rewrite it for a PM.
 7. **Questions section:** include only if real blockers exist. Otherwise omit entirely — no "- none" placeholder. No close-rule dashes.
+7b. **Questions section — buried-question sweep.** Reread the body hunting for "we could", "you may want to", "worth deciding", "another option", any rhetorical question, and any assumption the user never confirmed. Every hit is either resolved in the body or promoted into `⚑ Questions for you`. Then check each question there stands alone: problem sentence, lettered options with consequences, and a `My pick:` line. If the user would have to scroll up to answer, it fails.
 8. **AskUserQuestion timing:** if this turn ends with an `AskUserQuestion` tool call AND had substantive content, did I render the TLDR block in text immediately BEFORE the tool call (not deferred to a later turn that may never come)? The choices live in the tool, not a `⚑ Questions for you` block.
 9. **Brand label:** every reference outside the header reads "DS Mode".
 

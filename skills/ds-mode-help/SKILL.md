@@ -25,10 +25,16 @@ DS Mode is **active by default** once installed (mode = `full`).
 - one more, max three
 
 ⚑ Questions for you ──────────
-- A) option one  B) option two  C) defer
+- **Mute the alarm, or teach it to wait?**
+  What's going on: the alarm can't tell "waiting on you" from "actually broken".
+  - **A) Teach it to wait** — timer pauses while it needs you; real breakages still alert.
+  - **B) Mute it** — quickest, but you stop hearing about real breakages too.
+  My pick: **A** — keeps the warning honest for one small change.
 ```
 
-Three bullets max, twelve words each, ELI8 — a non-technical reader gets it in one pass. The `⚑ Questions for you` block only appears when there's a real blocker. The 10 × U+2500 dashes ride INLINE on the header lines; a line of dashes by itself would trip Claude mobile's markdown parser into emitting `<tr><td>` table HTML.
+Three bullets max, twelve words each, ELI8 — a non-technical reader gets it in one pass. The 10 × U+2500 dashes ride INLINE on the header lines; a line of dashes by itself would trip Claude mobile's markdown parser into emitting `<tr><td>` table HTML.
+
+The `⚑ Questions for you` block appears only when there's a real blocker — but when it does, it stands on its own. It names the problem in one plain sentence, lays out lettered options with what each one costs you, and always ends with a recommendation. It fires whether or not the question dialog is used, so an open decision never stays buried in the body where you'd have to ask "what do you suggest?" to find it.
 
 ## Modes
 
