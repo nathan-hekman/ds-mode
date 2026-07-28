@@ -234,6 +234,7 @@ function reminderFor({ mode, theme, mobileEnabled, mobileCfg, previewState, forc
       'Render the ☻ TLDR [ds-mode] block at the bottom of non-trivial replies (skip for one-line / yes-no / "done" / short status). ' +
       'Header `☻ TLDR [ds-mode] ──────────` (U+2500 dashes INLINE on the header line) as PLAIN markdown, never code-fenced; then MAX 3 bullets, MAX 12 words each, ELI8, zero jargon. No standalone dash-only lines. ' +
       'If calling AskUserQuestion with substantive content already in the turn, render the TLDR in text IMMEDIATELY BEFORE the tool call (choices go in the tool, not a ⚑ text block). ' +
+      'NEVER bury an open decision in the body. If the reply leaves a real choice open — "we could", "you may want to", an unconfirmed assumption, a second problem you did not fix, a rhetorical question — add a ⚑ Questions for you block even when NOT calling AskUserQuestion. Each question stands alone: one plain sentence on the problem, 2-4 lettered options with what each costs, then "My pick: **X** — [reason]". Always recommend; never wait to be asked which you prefer. ' +
       'IMAGES: do not auto-Read every screenshot/PNG; Read inline only to show a finished visual, prefer text preview tools while iterating.'
     : `DS MODE ACTIVE (mode: ${mode} · theme: ${theme}). ` +
     'MANDATORY: render the ☻ TLDR [ds-mode] block at the bottom of any non-trivial reply. ' +
