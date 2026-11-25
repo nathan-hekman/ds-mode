@@ -183,8 +183,7 @@ export const register: Register = on => {
 
     return (
       <Box flexDirection="column">
-        <Box flexDirection="row" justifyContent="space-between">
-          <Text bold>☻ TLDR</Text>
+        <Box flexDirection="row" justifyContent="flex-end">
           <Box flexDirection="row" gap={1}>
             <Text dimColor>{status}</Text>
             <Button

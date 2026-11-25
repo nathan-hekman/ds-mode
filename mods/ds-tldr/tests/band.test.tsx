@@ -60,7 +60,7 @@ test('a turn ends and the band shows the new TLDR, on every surface', async ($, 
   expect(prompts).toBeGreaterThan(0)
   for (const surface of ['terminal', 'desktop', 'vscode', 'mobile'] as const) {
     const ui = await $.ui.mount({ ...BAND, surface })
-    expect((await ui.find({ type: 'Text', text: /^☻ TLDR$/ }))?.text).toBe('☻ TLDR')
+    expect(await ui.find({ type: 'Text', text: /TLDR/ })).toBeUndefined()
     expect((await ui.find({ type: 'Text', text: /^Goal/ }))?.text).toBe('Goal')
     expect((await ui.find({ type: 'Text', text: /above the prompt/ }))?.text).toBe(
       'a TLDR band above the prompt',
