@@ -1,0 +1,11 @@
+{
+  "name": "ds-tldr",
+  "version": "0.1.0",
+  "description": "DS Mode session TLDR: a band above the prompt that keeps a plain-English summary of where the whole session stands, rewritten as work happens.",
+  "author": {
+    "name": "Nathan Hekman",
+    "url": "https://github.com/nathan-hekman"
+  },
+  "types": "./types/index.d.ts",
+  "license": "MIT"
+}
