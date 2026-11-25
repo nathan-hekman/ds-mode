@@ -16,7 +16,8 @@ const LABEL_COLORS: Record<string, string> = {
   Done: 'success',
   Now: 'suggestion',
   Next: 'subtle',
-  'Waiting on you': 'warning',
+  'Your move': 'warning',
+  'Waiting on you': 'warning', // TLDRs saved before the merge
 }
 
 // A small mark before each header, drawn in the header's colour.
@@ -25,6 +26,7 @@ const LABEL_ICONS: Record<string, string> = {
   Done: '✓',
   Now: '▸',
   Next: '→',
+  'Your move': '⚑',
   'Waiting on you': '⚑',
 }
 
@@ -37,13 +39,14 @@ const MAX_STORED_SESSIONS = 300
 const SYSTEM = `You keep a running TLDR of a Claude Code work session for a busy product manager.
 They open the session later and must understand in five seconds where things stand.
 
-Write 2 to 5 lines. Each line starts with one label and a colon, then at most 14 plain words.
+Write 2 to 4 lines. Each line starts with one label and a colon, then at most 14 plain words.
 Labels, in this order, only the ones that apply:
 Goal: what the user is trying to get done in this session.
 Done: the most important finished outcomes so far (one line, merge them).
 Now: what Claude is doing at this moment, if work is still running.
-Next: the next planned step.
-Waiting on you: a decision or action the user must take.
+Then exactly one of these two, never both:
+Your move: the decision or action the user must take next, when Claude is waiting on them.
+Next: the next planned step, when nothing needs the user.
 
 Rules: describe outcomes, not tool calls or file names unless the name matters.
 No jargon, no emoji, no markdown, no bullets. Short sentences.
@@ -262,13 +265,18 @@ function parseLines(text: string): string[] {
     .split('\n')
     .map(l => l.replace(/^[\s\-*•·]+/, '').trim())
     .filter(l => /^[A-Z][A-Za-z ]{1,20}:/.test(l))
-    .slice(0, 5)
+    .map(l => l.replace(/^Waiting on you:/, 'Your move:'))
+    .filter((l, _, all) => !(l.startsWith('Next:') && all.some(o => o.startsWith('Your move:'))))
+    .slice(0, 4)
 }
 
 function splitLine(line: string): { label: string; text: string } {
   const at = line.indexOf(':')
   if (at < 1) return { label: '', text: line }
-  return { label: line.slice(0, at).trim(), text: line.slice(at + 1).trim() }
+  const raw = line.slice(0, at).trim()
+  // TLDRs saved before the merge still say "Waiting on you".
+  const label = raw === 'Waiting on you' ? 'Your move' : raw
+  return { label, text: line.slice(at + 1).trim() }
 }
 
 function clockTime(ms: number): string {

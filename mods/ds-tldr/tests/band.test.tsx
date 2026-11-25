@@ -39,7 +39,7 @@ test('a turn ends and the band shows the new TLDR, on every surface', async ($, 
     return {
       value: {
         isAnswered: true,
-        text: '- Goal: a TLDR band above the prompt\nDone: built the band\nnoise line',
+        text: '- Goal: a TLDR band above the prompt\nDone: built the band\nNext: polish it\nYour move: pick a layout\nnoise line',
         usage: USAGE,
       },
     }
@@ -67,6 +67,9 @@ test('a turn ends and the band shows the new TLDR, on every surface', async ($, 
     )
     expect((await ui.find({ type: 'Text', text: /built the band/ }))?.text).toBe('built the band')
     expect(await ui.find({ type: 'Text', text: /noise/ })).toBeUndefined()
+    // Next and Your move never both show; Your move wins.
+    expect(await ui.find({ type: 'Text', text: /polish it/ })).toBeUndefined()
+    expect((await ui.find({ type: 'Text', text: /^Your move$/ }))?.text).toBe('Your move')
     await ui.unmount()
   }
 })
@@ -102,7 +105,7 @@ test('each section is a header with its detail below', async ($, on) => {
 
   for (const surface of ['terminal', 'desktop'] as const) {
     const ui = await $.ui.mount({ ...BAND, surface })
-    expect((await ui.find({ type: 'Text', text: /^Waiting on you$/ }))?.text).toBe('Waiting on you')
+    expect((await ui.find({ type: 'Text', text: /^Your move$/ }))?.text).toBe('Your move')
     expect((await ui.find({ type: 'Text', text: /^pick a style$/ }))?.text).toBe('pick a style')
     expect((await ui.find({ type: 'Text', text: /^⚑$/ }))?.text).toBe('⚑')
     expect((await ui.find({ type: 'Text', text: /^◎$/ }))?.text).toBe('◎')
