@@ -130,3 +130,34 @@ test('no TLDR yet: the band draws nothing of its own', async ($, on) => {
   expect((await ui.find({ type: 'Text', text: /engine/ }))?.text).toBe('engine')
   await ui.unmount()
 })
+
+test('hidden, the band makes no model calls; shown again, it catches up', async ($, on) => {
+  const clock = mock.clock(on)
+  mock.store(on, { 's:sess-4': { lines: ['Goal: ship it'], updatedAt: 0, lastUuid: 'u0' } })
+  let prompts = 0
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  on('session.id', () => ({ value: 'sess-4' }))
+  on('session.messages', () => ({ value: ROWS }))
+  on('model.complete', () => {
+    prompts += 1
+    return { value: { isAnswered: true, text: 'Goal: ship it\nDone: added hide', usage: USAGE } }
+  })
+  on('turn.complete', () => ({ text: '' }))
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  await ui.press({ key: 'toggle' })
+  expect((await ui.find({ type: 'Text', text: /hidden/ }))?.text).toBe('TLDR hidden, not updating')
+  expect(await ui.find({ type: 'Text', text: /ship it/ })).toBeUndefined()
+
+  const done = { answer: 'x', durationMs: 1, isAborted: false, turnId: 't', reason: 'answer' } as const
+  await $.turn.complete(done)
+  await clock.advance(120_000)
+  expect(prompts).toBe(0)
+
+  await ui.press({ key: 'toggle' })
+  await clock.advance(500)
+  expect(prompts).toBe(1)
+  expect((await ui.find({ type: 'Text', text: /added hide/ }))?.text).toBe('added hide')
+  await ui.unmount()
+})

@@ -16,7 +16,7 @@
     },
     {
       "name": "ds-tldr",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "description": "DS Mode session TLDR: a band above the prompt showing the goal, what is done, and your next move, kept current as work happens.",
       "source": "./mods/ds-tldr",
       "category": "productivity"

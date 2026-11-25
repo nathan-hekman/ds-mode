@@ -7,6 +7,6 @@ export type Summary = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'ds-tldr': { summary: Summary | null; isRefreshing: boolean }
+    'ds-tldr': { summary: Summary | null; isRefreshing: boolean; isMinimized: boolean }
   }
 }

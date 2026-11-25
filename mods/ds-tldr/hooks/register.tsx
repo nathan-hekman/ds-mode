@@ -10,6 +10,9 @@ import type { Summary } from '../types'
 
 const summary = atom({ plugin: 'ds-tldr', key: 'summary' } as const, null)
 const isRefreshing = atom({ plugin: 'ds-tldr', key: 'isRefreshing' } as const, false)
+// Minimized: the band shrinks to one row and makes no model calls until shown.
+const isMinimized = atom({ plugin: 'ds-tldr', key: 'isMinimized' } as const, false)
+const MINIMIZED_KEY = 'minimized'
 // Each section's header colour, a theme key so it follows light and dark.
 const LABEL_COLORS: Record<string, string> = {
   Goal: 'claude',
@@ -85,11 +88,20 @@ async function newRows($: EngineInterface): Promise<SessionMessage[]> {
   return Array.isArray(rows) ? rows : []
 }
 
+async function setMinimized($: EngineInterface, value: boolean) {
+  await update($, isMinimized, () => value)
+  await $.store.set(MINIMIZED_KEY, value)
+  // Showing it again catches up on everything that happened while hidden.
+  if (!value && mem.isDirty) await refresh($)
+}
+
 async function refresh($: EngineInterface) {
   if (mem.isRunning) {
     mem.rerun = true
     return
   }
+  // Hidden: keep the pending work marked and skip the model call.
+  if (await read($, isMinimized)) return
   mem.isRunning = true
   mem.isDirty = false
   try {
@@ -131,12 +143,14 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const result = await next(e)
     mem.sessionKey = `s:${await $.session.id()}`
+    if ((await $.store.get(MINIMIZED_KEY)) === true) await update($, isMinimized, () => true)
     const stored = (await $.store.get(mem.sessionKey)) as Stored | undefined
     if (stored && Array.isArray(stored.lines)) {
       mem.lastUuid = stored.lastUuid
       await update($, summary, () => ({ lines: stored.lines, updatedAt: stored.updatedAt }))
     } else {
       // A session that had turns before this mod existed: build its first TLDR.
+      mem.isDirty = true
       $.clock.after(1500, () => void refresh($))
     }
     $.clock.every(TICK_MS, () => {
@@ -173,9 +187,19 @@ export const register: Register = on => {
     if (e.props.hasSurvey) return next(e)
     const s = await read($, summary)
     const busy = await read($, isRefreshing)
-    if (!s && !busy) return next(e)
+    const minimized = await read($, isMinimized)
+    if (!s && !busy && !minimized) return next(e)
 
     const { Box, Button, Text } = $.ui.resolve(e)
+
+    if (minimized) {
+      return (
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text dimColor>TLDR hidden, not updating</Text>
+          <Button key="toggle" label="Show" plain dimColor onPress={() => setMinimized($, false)} />
+        </Box>
+      )
+    }
     const status = busy ? 'Updating...' : s ? `Updated ${clockTime(s.updatedAt)}` : ''
     const lines = s ? parseLines(s.lines.join('\n')) : []
 
@@ -193,6 +217,7 @@ export const register: Register = on => {
             return refresh($)
           }}
         />
+        <Button key="toggle" label="Hide" plain dimColor onPress={() => setMinimized($, true)} />
       </Box>
     )
 
