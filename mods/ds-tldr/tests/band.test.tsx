@@ -161,3 +161,23 @@ test('hidden, the band makes no model calls; shown again, it catches up', async 
   expect((await ui.find({ type: 'Text', text: /added hide/ }))?.text).toBe('added hide')
   await ui.unmount()
 })
+
+test('a new session starts hidden when the last one was hidden', async ($, on) => {
+  const clock = mock.clock(on)
+  mock.store(on, { minimized: true })
+  let prompts = 0
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  on('session.id', () => ({ value: 'sess-5' }))
+  on('session.messages', () => ({ value: ROWS }))
+  on('model.complete', () => {
+    prompts += 1
+    return { value: { isAnswered: true, text: 'Goal: x', usage: USAGE } }
+  })
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await clock.advance(5000)
+
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect((await ui.find({ type: 'Text', text: /hidden/ }))?.text).toBe('TLDR hidden, not updating')
+  expect(prompts).toBe(0)
+  await ui.unmount()
+})
