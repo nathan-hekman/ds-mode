@@ -10,6 +10,28 @@ import type { Summary } from '../types'
 
 const summary = atom({ plugin: 'ds-tldr', key: 'summary' } as const, null)
 const isRefreshing = atom({ plugin: 'ds-tldr', key: 'isRefreshing' } as const, false)
+// Which look the lines use; kept across sessions in $.store under 'style'.
+const style = atom({ plugin: 'ds-tldr', key: 'style' } as const, 0)
+
+// A: aligned coloured label column. B: bullet + coloured bold label.
+// C: coloured icon + bold label.
+const STYLES = [{ name: 'A' }, { name: 'B' }, { name: 'C' }] as const
+
+const LABEL_COLORS: Record<string, string> = {
+  Goal: 'claude',
+  Done: 'success',
+  Now: 'suggestion',
+  Next: 'subtle',
+  'Waiting on you': 'warning',
+}
+
+const LABEL_ICONS: Record<string, string> = {
+  Goal: '◎',
+  Done: '✓',
+  Now: '▸',
+  Next: '→',
+  'Waiting on you': '!',
+}
 
 const MODEL = 'haiku'
 const TICK_MS = 20_000 // how often the timer checks for new work
@@ -113,6 +135,8 @@ async function refresh($: EngineInterface) {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const result = await next(e)
+    const savedStyle = await $.store.get('style')
+    if (typeof savedStyle === 'number') await update($, style, () => savedStyle)
     mem.sessionKey = `s:${await $.session.id()}`
     const stored = (await $.store.get(mem.sessionKey)) as Stored | undefined
     if (stored && Array.isArray(stored.lines)) {
@@ -157,18 +181,20 @@ export const register: Register = on => {
     const s = await read($, summary)
     const busy = await read($, isRefreshing)
     if (!s && !busy) return next(e)
+    const styleIndex = (await read($, style)) % STYLES.length
+    const look = STYLES[styleIndex] ?? STYLES[0]!
 
     const { Box, Button, Text } = $.ui.resolve(e)
-    const status = busy ? 'updating...' : s ? `updated ${clockTime(s.updatedAt)}` : ''
+    const status = busy ? 'updating...' : s ? clockTime(s.updatedAt) : ''
 
     return (
       <Box flexDirection="column">
         <Box flexDirection="row" gap={1}>
-          <Text bold>Session TLDR</Text>
+          <Text bold>☻ TLDR</Text>
           <Text dimColor>{status}</Text>
           <Button
             key="refresh"
-            label="Refresh"
+            label="↻"
             plain
             dimColor
             onPress={() => {
@@ -176,13 +202,54 @@ export const register: Register = on => {
               return refresh($)
             }}
           />
+          <Button
+            key="style"
+            label={`style ${look.name}`}
+            plain
+            dimColor
+            onPress={async () => {
+              const nextIndex = (styleIndex + 1) % STYLES.length
+              await update($, style, () => nextIndex)
+              await $.store.set('style', nextIndex)
+            }}
+          />
         </Box>
         {s ? (
-          s.lines.map((line, i) => (
-            <Text key={`l${i}`} wrap="wrap">
-              {line}
-            </Text>
-          ))
+          s.lines.map((line, i) => {
+            const { label, text } = splitLine(line)
+            const color = LABEL_COLORS[label]
+            if (look.name === 'A') {
+              // Aligned label column, coloured; text wraps under itself.
+              return (
+                <Box key={`l${i}`} flexDirection="row">
+                  <Box width={16} flexShrink={0}>
+                    <Text bold color={color}>
+                      {label}
+                    </Text>
+                  </Box>
+                  <Box flexShrink={1}>
+                    <Text wrap="wrap">{text}</Text>
+                  </Box>
+                </Box>
+              )
+            }
+            const lead = look.name === 'B' ? '•' : (LABEL_ICONS[label] ?? '•')
+            return (
+              <Box key={`l${i}`} flexDirection="row" gap={1}>
+                <Box flexShrink={0}>
+                  <Text color={look.name === 'C' ? color : undefined} dimColor={look.name === 'B'}>
+                    {lead}
+                  </Text>
+                </Box>
+                <Box flexShrink={0}>
+                  <Text bold color={look.name === 'B' ? color : undefined}>{`${label}:`}</Text>
+                </Box>
+                <Box flexShrink={1}>
+                  <Text wrap="wrap">{text}</Text>
+                </Box>
+              </Box>
+            )
+          })
         ) : (
           <Text dimColor>Writing the first summary...</Text>
         )}
@@ -229,6 +296,12 @@ function parseLines(text: string): string[] {
     .map(l => l.replace(/^[\s\-*•·]+/, '').trim())
     .filter(l => /^[A-Z][A-Za-z ]{1,20}:/.test(l))
     .slice(0, 5)
+}
+
+function splitLine(line: string): { label: string; text: string } {
+  const at = line.indexOf(':')
+  if (at < 1) return { label: '', text: line }
+  return { label: line.slice(0, at).trim(), text: line.slice(at + 1).trim() }
 }
 
 function clockTime(ms: number): string {

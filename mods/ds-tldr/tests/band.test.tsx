@@ -60,10 +60,12 @@ test('a turn ends and the band shows the new TLDR, on every surface', async ($, 
   expect(prompts).toBeGreaterThan(0)
   for (const surface of ['terminal', 'desktop', 'vscode', 'mobile'] as const) {
     const ui = await $.ui.mount({ ...BAND, surface })
-    expect((await ui.find({ type: 'Text', text: /^Goal:/ }))?.text).toBe(
-      'Goal: a TLDR band above the prompt',
+    expect((await ui.find({ type: 'Text', text: /^☻ TLDR$/ }))?.text).toBe('☻ TLDR')
+    expect((await ui.find({ type: 'Text', text: /^Goal/ }))?.text).toBe('Goal')
+    expect((await ui.find({ type: 'Text', text: /above the prompt/ }))?.text).toBe(
+      'a TLDR band above the prompt',
     )
-    expect((await ui.find({ type: 'Text', text: /^Done:/ }))?.text).toBe('Done: built the band')
+    expect((await ui.find({ type: 'Text', text: /built the band/ }))?.text).toBe('built the band')
     expect(await ui.find({ type: 'Text', text: /noise/ })).toBeUndefined()
     await ui.unmount()
   }
@@ -84,9 +86,30 @@ test('a reopened session shows its saved TLDR without a model call', async ($, o
 
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /^Goal:/ }))?.text).toBe('Goal: ship the mod')
+  expect((await ui.find({ type: 'Text', text: /ship the mod/ }))?.text).toBe('ship the mod')
   expect(prompts).toBe(0)
   await ui.unmount()
+})
+
+test('the style button cycles A, B, C and remembers the pick', async ($, on) => {
+  mock.clock(on)
+  mock.store(on, { 's:sess-3': { lines: ['Done: built it'], updatedAt: 0 } })
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  on('session.id', () => ({ value: 'sess-3' }))
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+
+  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  await ui.press({ key: 'style' })
+  expect((await ui.find({ type: 'Text', text: /^•$/ }))?.text).toBe('•')
+  expect((await ui.find({ type: 'Text', text: /^Done:$/ }))?.text).toBe('Done:')
+  await ui.press({ key: 'style' })
+  expect((await ui.find({ type: 'Text', text: /^✓$/ }))?.text).toBe('✓')
+  await ui.unmount()
+
+  // The pick holds for the next drawing.
+  const again = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect((await again.find({ type: 'Text', text: /^✓$/ }))?.text).toBe('✓')
+  await again.unmount()
 })
 
 test('no TLDR yet: the band draws nothing of its own', async ($, on) => {
