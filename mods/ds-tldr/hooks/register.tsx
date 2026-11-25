@@ -14,7 +14,6 @@ const isRefreshing = atom({ plugin: 'ds-tldr', key: 'isRefreshing' } as const, f
 const LABEL_COLORS: Record<string, string> = {
   Goal: 'claude',
   Done: 'success',
-  Now: 'suggestion',
   Next: 'subtle',
   'Your move': 'warning',
   'Waiting on you': 'warning', // TLDRs saved before the merge
@@ -24,7 +23,6 @@ const LABEL_COLORS: Record<string, string> = {
 const LABEL_ICONS: Record<string, string> = {
   Goal: '◎',
   Done: '✓',
-  Now: '▸',
   Next: '→',
   'Your move': '⚑',
   'Waiting on you': '⚑',
@@ -39,11 +37,10 @@ const MAX_STORED_SESSIONS = 300
 const SYSTEM = `You keep a running TLDR of a Claude Code work session for a busy product manager.
 They open the session later and must understand in five seconds where things stand.
 
-Write 2 to 4 lines. Each line starts with one label and a colon, then at most 14 plain words.
+Write 2 or 3 lines. Each line starts with one label and a colon, then at most 14 plain words.
 Labels, in this order, only the ones that apply:
 Goal: what the user is trying to get done in this session.
 Done: the most important finished outcomes so far (one line, merge them).
-Now: what Claude is doing at this moment, if work is still running.
 Then exactly one of these two, never both:
 Your move: the decision or action the user must take next, when Claude is waiting on them.
 Next: the next planned step, when nothing needs the user.
@@ -277,6 +274,8 @@ function parseLines(text: string): string[] {
     .map(l => l.replace(/^[\s\-*•·]+/, '').trim())
     .filter(l => /^[A-Z][A-Za-z ]{1,20}:/.test(l))
     .map(l => l.replace(/^Waiting on you:/, 'Your move:'))
+    // Now was dropped: it only restated the live turn.
+    .filter(l => !l.startsWith('Now:'))
     .filter((l, _, all) => !(l.startsWith('Next:') && all.some(o => o.startsWith('Your move:'))))
     .slice(0, 4)
 }

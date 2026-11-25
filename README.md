@@ -112,7 +112,7 @@ Network failures are silent — a missed check just means you find out one sessi
 
 ## Session TLDR band (experimental mod)
 
-`mods/ds-tldr/` is a Claude Code mod (a plugin with a hooks module) that keeps a band above the prompt with a running TLDR of the whole session: Goal, Done, Now, and Your move (or Next). Haiku rewrites it at the end of every turn and about once a minute while a turn runs. Each session's TLDR is saved, so reopening a session shows where it stands. Works in the terminal, the desktop app, VS Code and mobile.
+`mods/ds-tldr/` is a Claude Code mod (a plugin with a hooks module) that keeps a band above the prompt with a running TLDR of the whole session: Goal, Done, and Your move (or Next). Haiku rewrites it at the end of every turn and about once a minute while a turn runs. Each session's TLDR is saved, so reopening a session shows where it stands. Works in the terminal, the desktop app, VS Code and mobile.
 
 Try it for one session:
 

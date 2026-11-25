@@ -99,7 +99,7 @@ test('each section is a header with its detail below', async ($, on) => {
   mock.clock(on)
   mock.store(on, {
     's:sess-3': {
-      lines: ['Goal: ship it', 'Next: polish it', 'Waiting on you: pick a style'],
+      lines: ['Goal: ship it', 'Now: running tests', 'Next: polish it', 'Waiting on you: pick a style'],
       updatedAt: 0,
     },
   })
@@ -113,6 +113,7 @@ test('each section is a header with its detail below', async ($, on) => {
     expect((await ui.find({ type: 'Text', text: /^pick a style$/ }))?.text).toBe('pick a style')
     // A TLDR saved by an older version shows Your move, not Next as well.
     expect(await ui.find({ type: 'Text', text: /polish it/ })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: /running tests/ })).toBeUndefined()
     expect((await ui.find({ type: 'Text', text: /^⚑$/ }))?.text).toBe('⚑')
     expect((await ui.find({ type: 'Text', text: /^◎$/ }))?.text).toBe('◎')
     expect(await ui.find({ type: 'Button', key: 'style' })).toBeUndefined()
