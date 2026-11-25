@@ -179,51 +179,61 @@ export const register: Register = on => {
     if (!s && !busy) return next(e)
 
     const { Box, Button, Text } = $.ui.resolve(e)
-    const status = busy ? 'updating...' : s ? clockTime(s.updatedAt) : ''
+    const status = busy ? 'Updating...' : s ? `Updated ${clockTime(s.updatedAt)}` : ''
+    const lines = s ? parseLines(s.lines.join('\n')) : []
 
+    // Time and refresh arrow, drawn at the right end of the first header.
+    const controls = (
+      <Box flexDirection="row" gap={1} flexShrink={0}>
+        <Text dimColor>{status}</Text>
+        <Button
+          key="refresh"
+          label="↻"
+          plain
+          dimColor
+          onPress={() => {
+            mem.isDirty = true
+            return refresh($)
+          }}
+        />
+      </Box>
+    )
+
+    if (lines.length === 0) {
+      return (
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text dimColor>Writing the first summary...</Text>
+          {controls}
+        </Box>
+      )
+    }
+
+    // One section per line: a coloured header on its own row, the detail
+    // under it, a blank row between sections. Saved lines go through the same
+    // rules as fresh ones, so a TLDR written by an older version still shows
+    // one of Next or Your move.
     return (
       <Box flexDirection="column">
-        <Box flexDirection="row" justifyContent="flex-end">
-          <Box flexDirection="row" gap={1}>
-            <Text dimColor>{status}</Text>
-            <Button
-              key="refresh"
-              label="↻"
-              plain
-              dimColor
-              onPress={() => {
-                mem.isDirty = true
-                return refresh($)
-              }}
-            />
-          </Box>
-        </Box>
-        {s ? (
-          // One section per line: a coloured header on its own row, the
-          // detail under it, a blank row between sections.
-          // Saved lines go through the same rules as fresh ones, so a TLDR
-          // written by an older version still shows one of Next or Your move.
-          parseLines(s.lines.join("\n")).map((line, i) => {
-            const { label, text } = splitLine(line)
-            return (
-              <Box key={`l${i}`} flexDirection="column" marginTop={1}>
-                {label ? (
-                  <Box flexDirection="row" gap={1}>
-                    <Text bold color={LABEL_COLORS[label]}>
-                      {LABEL_ICONS[label] ?? '•'}
-                    </Text>
-                    <Text bold color={LABEL_COLORS[label]}>
-                      {label}
-                    </Text>
-                  </Box>
-                ) : null}
-                <Text wrap="wrap">{text}</Text>
+        {lines.map((line, i) => {
+          const { label, text } = splitLine(line)
+          const color = LABEL_COLORS[label]
+          return (
+            <Box key={`l${i}`} flexDirection="column" marginTop={i === 0 ? 0 : 1}>
+              <Box flexDirection="row" justifyContent="space-between">
+                <Box flexDirection="row" gap={1}>
+                  <Text bold color={color}>
+                    {LABEL_ICONS[label] ?? '•'}
+                  </Text>
+                  <Text bold color={color}>
+                    {label || 'Summary'}
+                  </Text>
+                </Box>
+                {i === 0 ? controls : null}
               </Box>
-            )
-          })
-        ) : (
-          <Text dimColor>Writing the first summary...</Text>
-        )}
+              <Text wrap="wrap">{text}</Text>
+            </Box>
+          )
+        })}
       </Box>
     )
   })
