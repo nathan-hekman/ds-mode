@@ -202,7 +202,9 @@ export const register: Register = on => {
         {s ? (
           // One section per line: a coloured header on its own row, the
           // detail under it, a blank row between sections.
-          s.lines.map((line, i) => {
+          // Saved lines go through the same rules as fresh ones, so a TLDR
+          // written by an older version still shows one of Next or Your move.
+          parseLines(s.lines.join("\n")).map((line, i) => {
             const { label, text } = splitLine(line)
             return (
               <Box key={`l${i}`} flexDirection="column" marginTop={1}>

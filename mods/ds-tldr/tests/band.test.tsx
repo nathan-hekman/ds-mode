@@ -97,7 +97,10 @@ test('a reopened session shows its saved TLDR without a model call', async ($, o
 test('each section is a header with its detail below', async ($, on) => {
   mock.clock(on)
   mock.store(on, {
-    's:sess-3': { lines: ['Goal: ship it', 'Waiting on you: pick a style'], updatedAt: 0 },
+    's:sess-3': {
+      lines: ['Goal: ship it', 'Next: polish it', 'Waiting on you: pick a style'],
+      updatedAt: 0,
+    },
   })
   on('session.start', (_, e) => ({ cwd: e.cwd }))
   on('session.id', () => ({ value: 'sess-3' }))
@@ -107,6 +110,8 @@ test('each section is a header with its detail below', async ($, on) => {
     const ui = await $.ui.mount({ ...BAND, surface })
     expect((await ui.find({ type: 'Text', text: /^Your move$/ }))?.text).toBe('Your move')
     expect((await ui.find({ type: 'Text', text: /^pick a style$/ }))?.text).toBe('pick a style')
+    // A TLDR saved by an older version shows Your move, not Next as well.
+    expect(await ui.find({ type: 'Text', text: /polish it/ })).toBeUndefined()
     expect((await ui.find({ type: 'Text', text: /^⚑$/ }))?.text).toBe('⚑')
     expect((await ui.find({ type: 'Text', text: /^◎$/ }))?.text).toBe('◎')
     expect(await ui.find({ type: 'Button', key: 'style' })).toBeUndefined()
