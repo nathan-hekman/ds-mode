@@ -110,6 +110,18 @@ claude plugin update ds-mode@ds-mode
 
 Network failures are silent — a missed check just means you find out one session later.
 
+## Session TLDR band (experimental mod)
+
+`mods/ds-tldr/` is a Claude Code mod (a plugin with a hooks module) that keeps a band above the prompt with a running TLDR of the whole session: Goal, Done, Now, Next, Waiting on you. Haiku rewrites it at the end of every turn and about once a minute while a turn runs. Each session's TLDR is saved, so reopening a session shows where it stands. Works in the terminal, the desktop app, VS Code and mobile.
+
+Try it for one session:
+
+```bash
+claude --plugin-dir "./mods/ds-tldr"
+```
+
+Check it: `claude plugin validate mods/ds-tldr` and `claude plugin test mods/ds-tldr`. Each refresh is one small Haiku call, billed to your session.
+
 ## Install
 
 **Pure Claude Code commands (recommended):**
