@@ -10,13 +10,7 @@ import type { Summary } from '../types'
 
 const summary = atom({ plugin: 'ds-tldr', key: 'summary' } as const, null)
 const isRefreshing = atom({ plugin: 'ds-tldr', key: 'isRefreshing' } as const, false)
-// Which look the lines use; kept across sessions in $.store under 'style'.
-const style = atom({ plugin: 'ds-tldr', key: 'style' } as const, 0)
-
-// A: aligned coloured label column. B: bullet + coloured bold label.
-// C: coloured icon + bold label.
-const STYLES = [{ name: 'A' }, { name: 'B' }, { name: 'C' }] as const
-
+// Each section's header colour, a theme key so it follows light and dark.
 const LABEL_COLORS: Record<string, string> = {
   Goal: 'claude',
   Done: 'success',
@@ -25,12 +19,13 @@ const LABEL_COLORS: Record<string, string> = {
   'Waiting on you': 'warning',
 }
 
+// A small mark before each header, drawn in the header's colour.
 const LABEL_ICONS: Record<string, string> = {
   Goal: '◎',
   Done: '✓',
   Now: '▸',
   Next: '→',
-  'Waiting on you': '!',
+  'Waiting on you': '⚑',
 }
 
 const MODEL = 'haiku'
@@ -135,8 +130,6 @@ async function refresh($: EngineInterface) {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const result = await next(e)
-    const savedStyle = await $.store.get('style')
-    if (typeof savedStyle === 'number') await update($, style, () => savedStyle)
     mem.sessionKey = `s:${await $.session.id()}`
     const stored = (await $.store.get(mem.sessionKey)) as Stored | undefined
     if (stored && Array.isArray(stored.lines)) {
@@ -181,72 +174,46 @@ export const register: Register = on => {
     const s = await read($, summary)
     const busy = await read($, isRefreshing)
     if (!s && !busy) return next(e)
-    const styleIndex = (await read($, style)) % STYLES.length
-    const look = STYLES[styleIndex] ?? STYLES[0]!
 
     const { Box, Button, Text } = $.ui.resolve(e)
     const status = busy ? 'updating...' : s ? clockTime(s.updatedAt) : ''
 
     return (
       <Box flexDirection="column">
-        <Box flexDirection="row" gap={1}>
+        <Box flexDirection="row" justifyContent="space-between">
           <Text bold>☻ TLDR</Text>
-          <Text dimColor>{status}</Text>
-          <Button
-            key="refresh"
-            label="↻"
-            plain
-            dimColor
-            onPress={() => {
-              mem.isDirty = true
-              return refresh($)
-            }}
-          />
-          <Button
-            key="style"
-            label={`style ${look.name}`}
-            plain
-            dimColor
-            onPress={async () => {
-              const nextIndex = (styleIndex + 1) % STYLES.length
-              await update($, style, () => nextIndex)
-              await $.store.set('style', nextIndex)
-            }}
-          />
+          <Box flexDirection="row" gap={1}>
+            <Text dimColor>{status}</Text>
+            <Button
+              key="refresh"
+              label="↻"
+              plain
+              dimColor
+              onPress={() => {
+                mem.isDirty = true
+                return refresh($)
+              }}
+            />
+          </Box>
         </Box>
         {s ? (
+          // One section per line: a coloured header on its own row, the
+          // detail under it, a blank row between sections.
           s.lines.map((line, i) => {
             const { label, text } = splitLine(line)
-            const color = LABEL_COLORS[label]
-            if (look.name === 'A') {
-              // Aligned label column, coloured; text wraps under itself.
-              return (
-                <Box key={`l${i}`} flexDirection="row">
-                  <Box width={16} flexShrink={0}>
-                    <Text bold color={color}>
+            return (
+              <Box key={`l${i}`} flexDirection="column" marginTop={1}>
+                {label ? (
+                  <Box flexDirection="row" gap={1}>
+                    <Text bold color={LABEL_COLORS[label]}>
+                      {LABEL_ICONS[label] ?? '•'}
+                    </Text>
+                    <Text bold color={LABEL_COLORS[label]}>
                       {label}
                     </Text>
                   </Box>
-                  <Box flexShrink={1}>
-                    <Text wrap="wrap">{text}</Text>
-                  </Box>
-                </Box>
-              )
-            }
-            const lead = look.name === 'B' ? '•' : (LABEL_ICONS[label] ?? '•')
-            return (
-              <Box key={`l${i}`} flexDirection="row" gap={1}>
-                <Box flexShrink={0}>
-                  <Text color={look.name === 'C' ? color : undefined} dimColor={look.name === 'B'}>
-                    {lead}
-                  </Text>
-                </Box>
-                <Box flexShrink={0}>
-                  <Text bold color={look.name === 'B' ? color : undefined}>{`${label}:`}</Text>
-                </Box>
-                <Box flexShrink={1}>
-                  <Text wrap="wrap">{text}</Text>
-                </Box>
+                ) : null}
+                <Text wrap="wrap">{text}</Text>
               </Box>
             )
           })

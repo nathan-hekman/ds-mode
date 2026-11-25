@@ -91,25 +91,24 @@ test('a reopened session shows its saved TLDR without a model call', async ($, o
   await ui.unmount()
 })
 
-test('the style button cycles A, B, C and remembers the pick', async ($, on) => {
+test('each section is a header with its detail below', async ($, on) => {
   mock.clock(on)
-  mock.store(on, { 's:sess-3': { lines: ['Done: built it'], updatedAt: 0 } })
+  mock.store(on, {
+    's:sess-3': { lines: ['Goal: ship it', 'Waiting on you: pick a style'], updatedAt: 0 },
+  })
   on('session.start', (_, e) => ({ cwd: e.cwd }))
   on('session.id', () => ({ value: 'sess-3' }))
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
 
-  const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
-  await ui.press({ key: 'style' })
-  expect((await ui.find({ type: 'Text', text: /^•$/ }))?.text).toBe('•')
-  expect((await ui.find({ type: 'Text', text: /^Done:$/ }))?.text).toBe('Done:')
-  await ui.press({ key: 'style' })
-  expect((await ui.find({ type: 'Text', text: /^✓$/ }))?.text).toBe('✓')
-  await ui.unmount()
-
-  // The pick holds for the next drawing.
-  const again = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect((await again.find({ type: 'Text', text: /^✓$/ }))?.text).toBe('✓')
-  await again.unmount()
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const ui = await $.ui.mount({ ...BAND, surface })
+    expect((await ui.find({ type: 'Text', text: /^Waiting on you$/ }))?.text).toBe('Waiting on you')
+    expect((await ui.find({ type: 'Text', text: /^pick a style$/ }))?.text).toBe('pick a style')
+    expect((await ui.find({ type: 'Text', text: /^⚑$/ }))?.text).toBe('⚑')
+    expect((await ui.find({ type: 'Text', text: /^◎$/ }))?.text).toBe('◎')
+    expect(await ui.find({ type: 'Button', key: 'style' })).toBeUndefined()
+    await ui.unmount()
+  }
 })
 
 test('no TLDR yet: the band draws nothing of its own', async ($, on) => {
